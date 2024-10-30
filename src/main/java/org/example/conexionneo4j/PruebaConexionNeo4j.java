@@ -1,10 +1,6 @@
 package org.example.conexionneo4j;
 
-import org.neo4j.driver.AuthTokens;
-import org.neo4j.driver.Driver;
-import org.neo4j.driver.GraphDatabase;
-import org.neo4j.driver.Session;
-import org.neo4j.driver.Result;
+import org.neo4j.driver.*;
 
 public class PruebaConexionNeo4j {
 
