@@ -1,30 +1,22 @@
 package org.example.entidades;
 
+import java.util.Map;
+
+import org.bson.types.ObjectId;
 
 public class Huesped {
-    private String idHuesped;
+     private ObjectId idHuesped;
     private String nombre;
     private String apellido;
     private String telefono;
     private String email;
-    private Direccion direccion;
+    private Map<String, String> direccion;
 
-    // Constructor
-    public Huesped(String idHuesped, String nombre, String apellido, String telefono, String email, Direccion direccion) {
-        this.idHuesped = idHuesped;
-        this.nombre = nombre;
-        this.apellido = apellido;
-        this.telefono = telefono;
-        this.email = email;
-        this.direccion = direccion;
-    }
-
-    // Getters y Setters
-    public String getIdHuesped() {
+    public ObjectId getIdHuesped() {
         return idHuesped;
     }
 
-    public void setIdHuesped(String idHuesped) {
+    public void setIdHuesped(ObjectId idHuesped) {
         this.idHuesped = idHuesped;
     }
 
@@ -60,11 +52,21 @@ public class Huesped {
         this.email = email;
     }
 
-    public Direccion getDireccion() {
+    public Map<String, String> getDireccion() {
         return direccion;
     }
 
-    public void setDireccion(Direccion direccion) {
+    public void setDireccion(Map<String, String> direccion) {
+        this.direccion = direccion;
+    }
+
+    // Constructor
+    public Huesped(ObjectId idHuesped, String nombre, String apellido, String telefono, String email, Map<String, String> direccion) {
+        this.idHuesped = idHuesped;
+        this.nombre = nombre;
+        this.apellido = apellido;
+        this.telefono = telefono;
+        this.email = email;
         this.direccion = direccion;
     }
 }

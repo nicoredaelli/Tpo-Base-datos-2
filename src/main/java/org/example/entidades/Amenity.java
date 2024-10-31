@@ -3,23 +3,15 @@ package org.example.entidades;
 
 
 public class Amenity {
-    private String idAmenity;
+    private int idAmenity;
     private String nombre;
     private String descripcion;
 
-    // Constructor
-    public Amenity(String idAmenity, String nombre, String descripcion) {
-        this.idAmenity = idAmenity;
-        this.nombre = nombre;
-        this.descripcion = descripcion;
-    }
-
-    // Getters y Setters
-    public String getIdAmenity() {
+    public int getIdAmenity() {
         return idAmenity;
     }
 
-    public void setIdAmenity(String idAmenity) {
+    public void setIdAmenity(int idAmenity) {
         this.idAmenity = idAmenity;
     }
 
@@ -36,6 +28,13 @@ public class Amenity {
     }
 
     public void setDescripcion(String descripcion) {
+        this.descripcion = descripcion;
+    }
+
+    // Constructor
+    public Amenity(int idAmenity, String nombre, String descripcion) {
+        this.idAmenity = idAmenity;
+        this.nombre = nombre;
         this.descripcion = descripcion;
     }
 }

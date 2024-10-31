@@ -1,35 +1,24 @@
 package org.example.entidades;
 
-
-
 import java.util.List;
+import java.util.Map;
+
+import org.bson.types.ObjectId;
 
 public class Hotel {
-    private String idHotel;
+     private ObjectId idHotel;
     private String nombre;
     private String telefono;
     private String email;
-    private Direccion direccion;
-    private List<String> habitaciones;
-    private String idZona;
+    private Map<String, String> direccion;
+    private List<Integer> habitaciones;
+    private int zona;
 
-    // Constructor
-    public Hotel(String idHotel, String nombre, String telefono, String email, Direccion direccion, List<String> habitaciones, String idZona) {
-        this.idHotel = idHotel;
-        this.nombre = nombre;
-        this.telefono = telefono;
-        this.email = email;
-        this.direccion = direccion;
-        this.habitaciones = habitaciones;
-        this.idZona = idZona;
-    }
-
-    // Getters y Setters
-    public String getIdHotel() {
+    public ObjectId getIdHotel() {
         return idHotel;
     }
 
-    public void setIdHotel(String idHotel) {
+    public void setIdHotel(ObjectId idHotel) {
         this.idHotel = idHotel;
     }
 
@@ -57,27 +46,38 @@ public class Hotel {
         this.email = email;
     }
 
-    public Direccion getDireccion() {
+    public Map<String, String> getDireccion() {
         return direccion;
     }
 
-    public void setDireccion(Direccion direccion) {
+    public void setDireccion(Map<String, String> direccion) {
         this.direccion = direccion;
     }
 
-    public List<String> getHabitaciones() {
+    public List<Integer> getHabitaciones() {
         return habitaciones;
     }
 
-    public void setHabitaciones(List<String> habitaciones) {
+    public void setHabitaciones(List<Integer> habitaciones) {
         this.habitaciones = habitaciones;
     }
 
-    public String getIdZona() {
-        return idZona;
+    public int getZona() {
+        return zona;
     }
 
-    public void setIdZona(String idZona) {
-        this.idZona = idZona;
+    public void setZona(int zona) {
+        this.zona = zona;
+    }
+
+    // Constructor
+    public Hotel(ObjectId idHotel, String nombre, String telefono, String email, Map<String, String> direccion, List<Integer> habitaciones, int zona) {
+        this.idHotel = idHotel;
+        this.nombre = nombre;
+        this.telefono = telefono;
+        this.email = email;
+        this.direccion = direccion;
+        this.habitaciones = habitaciones;
+        this.zona = zona;
     }
 }

@@ -1,37 +1,28 @@
 package org.example.entidades;
 
-
-
 import java.util.List;
 
+import org.bson.types.ObjectId;
+
 public class Habitacion {
-    private String nroHabitacion;
-    private String idHotel;
+    private int nroHabitacion;
+    private ObjectId idHotel;
     private String tipoHabitacion;
-    private List<String> amenities;
+    private List<Integer> amenities;
 
-    // Constructor
-    public Habitacion(String nroHabitacion, String idHotel, String tipoHabitacion, List<String> amenities) {
-        this.nroHabitacion = nroHabitacion;
-        this.idHotel = idHotel;
-        this.tipoHabitacion = tipoHabitacion;
-        this.amenities = amenities;
-    }
-
-    // Getters y Setters
-    public String getNroHabitacion() {
+    public int getNroHabitacion() {
         return nroHabitacion;
     }
 
-    public void setNroHabitacion(String nroHabitacion) {
+    public void setNroHabitacion(int nroHabitacion) {
         this.nroHabitacion = nroHabitacion;
     }
 
-    public String getIdHotel() {
+    public ObjectId getIdHotel() {
         return idHotel;
     }
 
-    public void setIdHotel(String idHotel) {
+    public void setIdHotel(ObjectId idHotel) {
         this.idHotel = idHotel;
     }
 
@@ -43,11 +34,19 @@ public class Habitacion {
         this.tipoHabitacion = tipoHabitacion;
     }
 
-    public List<String> getAmenities() {
+    public List<Integer> getAmenities() {
         return amenities;
     }
 
-    public void setAmenities(List<String> amenities) {
+    public void setAmenities(List<Integer> amenities) {
+        this.amenities = amenities;
+    }
+
+    // Constructor
+    public Habitacion(int nroHabitacion, ObjectId idHotel, String tipoHabitacion, List<Integer> amenities) {
+        this.nroHabitacion = nroHabitacion;
+        this.idHotel = idHotel;
+        this.tipoHabitacion = tipoHabitacion;
         this.amenities = amenities;
     }
 }
