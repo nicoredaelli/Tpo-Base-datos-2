@@ -6,25 +6,25 @@ import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
 import org.bson.Document;
 
+import com.mongodb.client.MongoDatabase;
+import com.mongodb.client.MongoCollection;
+import org.bson.Document;
+
 public class PruebaConexionMongo {
-
     public static void main(String[] args) {
+        try {
+            // Obtener la base de datos desde MongoDBConnection
+            MongoDatabase database = MongoDBConnection.getDatabase();
 
-        String uri = "mongodb+srv://NicolasIglesias:Nico2024@cluster0.o3iom.mongodb.net/";
-
-        try (MongoClient mongoClient = MongoClients.create(uri)) {
-            // Acceder a la base de datos
-            MongoDatabase database = mongoClient.getDatabase("Cadena");
-
-            // Acceder a una colección específica
-            MongoCollection<Document> collection = database.getCollection("Hotel");
-
-            // Realizar una operación simple para verificar la conexión (obtener el primer documento)
-            Document document = collection.find().first();
-            System.out.println("Documento encontrado: " + document);
+            // Listar las colecciones disponibles en la base de datos
+            System.out.println("Colecciones en la base de datos '" + database.getName() + "':");
+            for (String name : database.listCollectionNames()) {
+                System.out.println("- " + name);
+            }
 
         } catch (Exception e) {
-            System.err.println("Error conectando a MongoDB: " + e.getMessage());
+            System.err.println("Error al conectarse a MongoDB Atlas: " + e.getMessage());
         }
     }
 }
+

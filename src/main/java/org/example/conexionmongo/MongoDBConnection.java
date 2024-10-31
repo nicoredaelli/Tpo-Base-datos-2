@@ -5,8 +5,9 @@ import com.mongodb.client.MongoClients;
 import com.mongodb.client.MongoDatabase;
 
 public class MongoDBConnection {
-    private static final String URI = "mongodb://localhost:27017";
-    private static final String DATABASE_NAME = "tpo-bbdd2";
+    //private static final String URI = "mongodb://localhost:27017";
+    private static final String URI = "mongodb+srv://NicolasIglesias:Nico2024@cluster0.o3iom.mongodb.net/tpo-bbdd2?retryWrites=true&w=majority";
+    private static final String DATABASE_NAME = "Cadena";
     private static MongoClient mongoClient;
 
     // metodo para obtener la conexión a la base de datos
