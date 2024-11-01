@@ -27,28 +27,29 @@ public class CRUDController {
 
     // CRUD para la entidad Hotel
     public void createHotel(Hotel hotel) {
-
-        // Mongo
-
-        MongoCollection<Document> collection = mongoDB.getCollection("hoteles");
-        Document document = new Document("_id", hotel.getObjectIDHotel())
-                .append("id_hotel", hotel.getIdHotel())
-                .append("nombre", hotel.getNombre())
-                .append("telefono", hotel.getTelefono())
-                .append("email", hotel.getEmail())
-                .append("direccion", hotel.getDireccion())
-                .append("habitaciones", hotel.getHabitaciones())
-                .append("zona", hotel.getZona());
-        collection.insertOne(document);
-        this.aumentarUltimoIdHotel();
-
+        try {
+            // MongoDB
+            MongoCollection<Document> collection = mongoDB.getCollection("hoteles");
+            Document document = new Document("_id", hotel.getObjectIDHotel())
+                    .append("id_hotel", hotel.getIdHotel())
+                    .append("nombre", hotel.getNombre())
+                    .append("telefono", hotel.getTelefono())
+                    .append("email", hotel.getEmail())
+                    .append("direccion", hotel.getDireccion())
+                    .append("habitaciones", hotel.getHabitaciones())
+                    .append("zona", hotel.getZona());
+            collection.insertOne(document);
+            this.aumentarUltimoIdHotel();
+        } catch (Exception e) {
+            System.err.println("Error inserting hotel in MongoDB: " + e.getMessage());
+        }
+    
         // Neo4j
-
         try (Session session = neo4jDB.session()) {
             Zona zonaHotel = this.readZona(hotel.getZona());
-
-            session.writeTransaction(tx -> {
-                tx.run(
+            if (zonaHotel != null) {
+                session.writeTransaction(tx -> {
+                    tx.run(
                         "MERGE (h:hotel {id_hotel: $id_hotel, nombre: $nombre_hotel}) " +
                                 "MERGE (z:zona {id_zona: $id_zona, nombre: $nombre_zona}) " +
                                 "MERGE (h)-[:PERTENECE]->(z)",
@@ -58,26 +59,63 @@ public class CRUDController {
                                 "id_zona", zonaHotel.getIdZona(),
                                 "nombre_zona", zonaHotel.getNombre()
                         )
-                );
-                return null; // se agrega para evitar un error que marca el IDE
-            });
+                    );
+                    return null;
+                });
+            } else {
+                System.err.println("Zona not found for the hotel in Neo4j.");
+            }
+        } catch (Exception e) {
+            System.err.println("Error inserting hotel in Neo4j: " + e.getMessage());
         }
     }
+    
 
     public Hotel readHotel(int idHotel) {
-        MongoCollection<Document> collection = mongoDB.getCollection("hoteles");
-        Document doc = collection.find(Filters.eq("id_hotel", idHotel)).first();
-        return (doc != null) ? new Hotel(
-                doc.getObjectId("_id"),
-                doc.getInteger("id_hotel"),
-                doc.getString("nombre"),
-                doc.getString("telefono"),
-                doc.getString("email"),
-                (Map<String, String>) doc.get("direccion"),
-                (List<Integer>) doc.get("habitaciones"),
-                doc.getInteger("zona")
-        ) : null;
+        try {
+            // Obtener la colección de hoteles en MongoDB
+            MongoCollection<Document> collection = mongoDB.getCollection("hoteles");
+    
+            // Buscar el documento del hotel según el `id_hotel`
+            Document doc = collection.find(Filters.eq("id_hotel", idHotel)).first();
+    
+            // Si el documento existe, mapearlo a la clase `Hotel`
+            if (doc != null) {
+                return new Hotel(
+                    doc.getObjectId("_id"),
+                    doc.getInteger("id_hotel"),
+                    doc.getString("nombre"),
+                    doc.getString("telefono"),
+                    doc.getString("email"),
+                    (Map<String, String>) doc.get("direccion"),   // Casteo a `Map` para la dirección
+                    (List<Integer>) doc.get("habitaciones"),      // Casteo a `List` para las habitaciones
+                    doc.getInteger("zona")
+                );
+            } else {
+                System.out.println("Hotel con id_hotel " + idHotel + " no encontrado en MongoDB.");
+                return null;
+            }
+        } catch (Exception e) {
+            System.err.println("Error al leer el hotel de MongoDB: " + e.getMessage());
+            return null;
+        }
     }
+    
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    
 
     public void updateHotel(ObjectId idHotel, String nuevoNombre) {
         MongoCollection<Document> collection = mongoDB.getCollection("hoteles");
