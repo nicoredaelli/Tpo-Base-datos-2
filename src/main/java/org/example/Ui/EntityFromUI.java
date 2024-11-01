@@ -104,8 +104,15 @@ class EntityFormUI extends JFrame {
                 case "Actualizar":
                     if (entity.equals("Hotel")) {
                         // Actualizar nombre de un hotel
-                        ObjectId idHotel = new ObjectId(idField.getText());
-                        controller.updateHotel(idHotel, nombreField.getText());
+
+                        controller.updateHotel(
+                                Integer.parseInt(idField.getText()),
+                                nombreField.getText(),
+                                telefonoField.getText(),
+                                Map.of("direccion", direccionField.getText()),
+                                emailField.getText(),
+                                Integer.parseInt(zonaField.getText())
+                        );
                     }
                     // Repite para otras entidades
                     break;
@@ -113,11 +120,13 @@ class EntityFormUI extends JFrame {
                 case "Eliminar":
                     if (entity.equals("Hotel")) {
                         // Eliminar un hotel por ID
-                        ObjectId idHotel = new ObjectId(idField.getText());
+                        int idHotel = Integer.parseInt(idField.getText());
                         controller.deleteHotel(idHotel);
                     }
                     // Repite para otras entidades
                     break;
+                default:
+                    throw new IllegalStateException("Unexpected value: " + action);
             }
             JOptionPane.showMessageDialog(this, entity + " " + action + " exitosamente.");
         } catch (Exception ex) {

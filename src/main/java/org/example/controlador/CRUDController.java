@@ -1,5 +1,6 @@
 package org.example.controlador;
 
+import com.mongodb.ReadPreference;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
 import com.mongodb.client.model.Filters;
@@ -41,7 +42,7 @@ public class CRUDController {
             collection.insertOne(document);
             this.aumentarUltimoIdHotel();
         } catch (Exception e) {
-            System.err.println("Error inserting hotel in MongoDB: " + e.getMessage());
+            System.err.println("Error al insertar un hotel en MongoDB: " + e.getMessage());
         }
     
         // Neo4j
@@ -63,10 +64,10 @@ public class CRUDController {
                     return null;
                 });
             } else {
-                System.err.println("Zona not found for the hotel in Neo4j.");
+                System.err.println("Zona no encontrada");
             }
         } catch (Exception e) {
-            System.err.println("Error inserting hotel in Neo4j: " + e.getMessage());
+            System.err.println("Error al insertar hotel en Neo4j: " + e.getMessage());
         }
     }
     
@@ -74,7 +75,7 @@ public class CRUDController {
     public Hotel readHotel(int idHotel) {
         try {
             // Obtener la colección de hoteles en MongoDB
-            MongoCollection<Document> collection = mongoDB.getCollection("hoteles");
+            MongoCollection<Document> collection = mongoDB.getCollection("hoteles");;
     
             // Buscar el documento del hotel según el `id_hotel`
             Document doc = collection.find(Filters.eq("id_hotel", idHotel)).first();
@@ -100,32 +101,98 @@ public class CRUDController {
             return null;
         }
     }
-    
 
+    public void updateHotel(int idHotel, String nuevoNombre, String nuevoTelefono, Map<String, String> nuevaDireccion, String nuevoEmail, int nuevaZona) {
 
+        // actualizar el hotel en MongoDB
 
-
-
-
-
-
-
-
-
-
-
-
-    
-
-    public void updateHotel(ObjectId idHotel, String nuevoNombre) {
         MongoCollection<Document> collection = mongoDB.getCollection("hoteles");
-        collection.updateOne(Filters.eq("_id", idHotel), Updates.set("nombre", nuevoNombre));
+
+        collection.updateOne(
+                Filters.eq("id_hotel", idHotel),
+                Updates.combine(
+                        Updates.set("nombre", nuevoNombre),
+                        Updates.set("telefono", nuevoTelefono),
+                        Updates.set("direccion", nuevaDireccion),
+                        Updates.set("email", nuevoEmail),
+                        Updates.set("zona", nuevaZona)
+                )
+        );
+
+        // Neo4j: Actualizar la relación entre la zona y el hotel
+        try (Session session = neo4jDB.session()) {
+            // Primero, elimina la relación existente del hotel con la zona anterior
+            session.writeTransaction(tx -> {
+                tx.run(
+                        "MATCH (h:hotel {id_hotel: $id_hotel})-[r:PERTENECE]->(z:zona) " +
+                                "DELETE r",
+                        Map.of("id_hotel", idHotel)
+                );
+                return null;
+            });
+
+            // Luego, crea la nueva relación con la nueva zona
+            Zona nuevaZonaInfo = this.readZona(nuevaZona);  // Obtenemos la información de la nueva zona desde MongoDB
+            if (nuevaZonaInfo != null) {
+                session.writeTransaction(tx -> {
+                    tx.run(
+                            "MERGE (h:hotel {id_hotel: $id_hotel, nombre: $nombre_hotel}) " +
+                                    "MERGE (z:zona {id_zona: $id_zona, nombre: $nombre_zona}) " +
+                                    "MERGE (h)-[:PERTENECE]->(z)",
+                            Map.of(
+                                    "id_hotel", idHotel,
+                                    "nombre_hotel", nuevoNombre,
+                                    "id_zona", nuevaZonaInfo.getIdZona(),
+                                    "nombre_zona", nuevaZonaInfo.getNombre()
+                            )
+                    );
+                    return null;
+                });
+            } else {
+                System.err.println("Zona no encontrada en MongoDB");
+            }
+        } catch (Exception e) {
+            System.err.println("Error al actualizar el hotel en Neo4j: " + e.getMessage());
+        }
+
     }
 
-    public void deleteHotel(ObjectId idHotel) {
+    public void deleteHotel(int idHotel) {
+
+        // Eliminar el hotel de la base de datos MongoDB
+
+        Hotel hotelAEliminar = this.readHotel(idHotel);
+
         MongoCollection<Document> collection = mongoDB.getCollection("hoteles");
-        collection.deleteOne(Filters.eq("_id", idHotel));
+        collection.deleteOne(Filters.eq("id_hotel", hotelAEliminar.getIdHotel()));
+
+
+        // Eliminar el hotel de base de datos Neo4j
+
+        try (Session session = neo4jDB.session()) {
+            session.writeTransaction(tx -> {
+                tx.run(
+                        "MATCH (h:hotel {id_hotel: $idHotel})-[r:PERTENECE]->(z:zona {id_zona: $idZona}) " +
+                                "DETACH DELETE h",
+                        Map.of("idHotel", hotelAEliminar.getIdHotel(), "idZona", hotelAEliminar.getZona())
+                );
+                return null;
+            });
+            System.out.println("Hotel eliminado de Neo4j con nombre: " + hotelAEliminar.getNombre());
+        } catch (Exception e) {
+            System.err.println("Error al eliminar el hotel en Neo4j: " + e.getMessage());
+        }
     }
+
+
+
+
+
+
+
+
+
+
 
     // CRUD para la entidad Habitacion
     public void createHabitacion(Habitacion habitacion) {
