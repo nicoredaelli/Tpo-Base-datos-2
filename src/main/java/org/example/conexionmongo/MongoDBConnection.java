@@ -17,4 +17,11 @@ public class MongoDBConnection {
         }
         return mongoClient.getDatabase(DATABASE_NAME);
     }
+
+    // Metodo para cerrar la conexión de MongoDB
+    public static void closeConnection() {
+        if (mongoClient != null) {
+            mongoClient.close();
+        }
+    }
 }
