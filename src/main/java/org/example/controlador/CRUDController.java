@@ -43,19 +43,25 @@ public class CRUDController {
         this.aumentarUltimoIdHotel();
 
         // Neo4j
-        try (Session session = Neo4jDBConnection.getConnection().session()) {
-            Map<String, Object> params = Map.of(
-                    "id_hotel", hotel.getIdHotel(),
-                    "nombre", hotel.getNombre()
-            );
 
-            session.writeTransaction(tx -> tx.run(
-                    "CREATE (h:hotel {id_hotel: $id_hotel, nombre: $nombre})",
-                    params
-            ));
+        try (Session session = neo4jDB.session()) {
+            Zona zonaHotel = this.readZona(hotel.getZona());
+
+            session.writeTransaction(tx -> {
+                tx.run(
+                        "MERGE (h:hotel {id_hotel: $id_hotel, nombre: $nombre_hotel}) " +
+                                "MERGE (z:zona {id_zona: $id_zona, nombre: $nombre_zona}) " +
+                                "MERGE (h)-[:PERTENECE]->(z)",
+                        Map.of(
+                                "id_hotel", hotel.getIdHotel(),
+                                "nombre_hotel", hotel.getNombre(),
+                                "id_zona", zonaHotel.getIdZona(),
+                                "nombre_zona", zonaHotel.getNombre()
+                        )
+                );
+                return null; // se agrega para evitar un error que marca el IDE
+            });
         }
-
-
     }
 
     public Hotel readHotel(int idHotel) {
@@ -85,7 +91,7 @@ public class CRUDController {
 
     // CRUD para la entidad Habitacion
     public void createHabitacion(Habitacion habitacion) {
-        MongoCollection<Document> collection = mongoDB.getCollection("Habitaciones");
+        MongoCollection<Document> collection = mongoDB.getCollection("habitaciones");
         Document document = new Document("nroHabitacion", habitacion.getNroHabitacion())
                 .append("idHotel", habitacion.getIdHotel())
                 .append("tipoHabitacion", habitacion.getTipoHabitacion())
@@ -94,7 +100,7 @@ public class CRUDController {
     }
 
     public Habitacion readHabitacion(int nroHabitacion) {
-        MongoCollection<Document> collection = mongoDB.getCollection("Habitaciones");
+        MongoCollection<Document> collection = mongoDB.getCollection("habitaciones");
         Document doc = collection.find(Filters.eq("nroHabitacion", nroHabitacion)).first();
         return (doc != null) ? new Habitacion(
                 doc.getInteger("nroHabitacion"),
@@ -105,18 +111,18 @@ public class CRUDController {
     }
 
     public void updateHabitacion(int nroHabitacion, String nuevoTipoHabitacion) {
-        MongoCollection<Document> collection = mongoDB.getCollection("Habitaciones");
+        MongoCollection<Document> collection = mongoDB.getCollection("habitaciones");
         collection.updateOne(Filters.eq("nroHabitacion", nroHabitacion), Updates.set("tipoHabitacion", nuevoTipoHabitacion));
     }
 
     public void deleteHabitacion(int nroHabitacion) {
-        MongoCollection<Document> collection = mongoDB.getCollection("Habitaciones");
+        MongoCollection<Document> collection = mongoDB.getCollection("habitaciones");
         collection.deleteOne(Filters.eq("nroHabitacion", nroHabitacion));
     }
 
     // CRUD para la entidad Huesped
     public void createHuesped(Huesped huesped) {
-        MongoCollection<Document> collection = mongoDB.getCollection("Huespedes");
+        MongoCollection<Document> collection = mongoDB.getCollection("huespedes");
         Document document = new Document("_id", huesped.getIdHuesped())
                 .append("nombre", huesped.getNombre())
                 .append("apellido", huesped.getApellido())
@@ -127,7 +133,7 @@ public class CRUDController {
     }
 
     public Huesped readHuesped(ObjectId idHuesped) {
-        MongoCollection<Document> collection = mongoDB.getCollection("Huespedes");
+        MongoCollection<Document> collection = mongoDB.getCollection("huespedes");
         Document doc = collection.find(Filters.eq("_id", idHuesped)).first();
         return (doc != null) ? new Huesped(
                 doc.getObjectId("_id"),
@@ -140,87 +146,87 @@ public class CRUDController {
     }
 
     public void updateHuesped(ObjectId idHuesped, String nuevoEmail) {
-        MongoCollection<Document> collection = mongoDB.getCollection("Huespedes");
+        MongoCollection<Document> collection = mongoDB.getCollection("huespedes");
         collection.updateOne(Filters.eq("_id", idHuesped), Updates.set("email", nuevoEmail));
     }
 
     public void deleteHuesped(ObjectId idHuesped) {
-        MongoCollection<Document> collection = mongoDB.getCollection("Huespedes");
+        MongoCollection<Document> collection = mongoDB.getCollection("huespedes");
         collection.deleteOne(Filters.eq("_id", idHuesped));
     }
 
     // CRUD para la entidad Reserva
     public void createReserva(Reserva reserva) {
-        MongoCollection<Document> collection = mongoDB.getCollection("Reservas");
-        Document document = new Document("codReserva", reserva.getCodReserva())
+        MongoCollection<Document> collection = mongoDB.getCollection("reservas");
+        Document document = new Document("cod_reserva", reserva.getCodReserva())
                 .append("checkin", reserva.getCheckin())
                 .append("checkout", reserva.getCheckout())
-                .append("estadoReserva", reserva.getEstadoReserva())
+                .append("estado_reserva", reserva.getEstadoReserva())
                 .append("tarifa", reserva.getTarifa())
-                .append("idHotel", reserva.getIdHotel())
-                .append("idHabitacion", reserva.getIdHabitacion())
-                .append("idHuesped", reserva.getIdHuesped());
+                .append("id_hotel", reserva.getIdHotel())
+                .append("id_habitacion", reserva.getIdHabitacion())
+                .append("id_huesped", reserva.getIdHuesped());
         collection.insertOne(document);
     }
 
     public Reserva readReserva(int codReserva) {
-        MongoCollection<Document> collection = mongoDB.getCollection("Reservas");
-        Document doc = collection.find(Filters.eq("codReserva", codReserva)).first();
+        MongoCollection<Document> collection = mongoDB.getCollection("reservas");
+        Document doc = collection.find(Filters.eq("cod_reserva", codReserva)).first();
         return (doc != null) ? new Reserva(
-                doc.getInteger("codReserva"),
+                doc.getInteger("cod_reserva"),
                 doc.getString("checkin"),
                 doc.getString("checkout"),
-                doc.getString("estadoReserva"),
+                doc.getString("estado_reserva"),
                 doc.getDouble("tarifa"),
-                doc.getObjectId("idHotel"),
-                doc.getInteger("idHabitacion"),
-                doc.getObjectId("idHuesped")
+                doc.getObjectId("id_hotel"),
+                doc.getInteger("id_habitacion"),
+                doc.getObjectId("id_huesped")
         ) : null;
     }
 
     public void updateReserva(int codReserva, String nuevoEstado) {
-        MongoCollection<Document> collection = mongoDB.getCollection("Reservas");
-        collection.updateOne(Filters.eq("codReserva", codReserva), Updates.set("estadoReserva", nuevoEstado));
+        MongoCollection<Document> collection = mongoDB.getCollection("reservas");
+        collection.updateOne(Filters.eq("cod_reserva", codReserva), Updates.set("estadoReserva", nuevoEstado));
     }
 
     public void deleteReserva(int codReserva) {
-        MongoCollection<Document> collection = mongoDB.getCollection("Reservas");
-        collection.deleteOne(Filters.eq("codReserva", codReserva));
+        MongoCollection<Document> collection = mongoDB.getCollection("reservas");
+        collection.deleteOne(Filters.eq("cod_reserva", codReserva));
     }
 
     // CRUD para la entidad Amenity
 public void createAmenity(Amenity amenity) {
-    MongoCollection<Document> collection = mongoDB.getCollection("Amenities");
-    Document document = new Document("idAmenity", amenity.getIdAmenity())
+    MongoCollection<Document> collection = mongoDB.getCollection("amenities");
+    Document document = new Document("id_amenities", amenity.getIdAmenity())
             .append("nombre", amenity.getNombre())
             .append("descripcion", amenity.getDescripcion());
     collection.insertOne(document);
 }
 
 public Amenity readAmenity(int idAmenity) {
-    MongoCollection<Document> collection = mongoDB.getCollection("Amenities");
-    Document doc = collection.find(Filters.eq("idAmenity", idAmenity)).first();
+    MongoCollection<Document> collection = mongoDB.getCollection("amenities");
+    Document doc = collection.find(Filters.eq("id_amenities", idAmenity)).first();
     return (doc != null) ? new Amenity(
-            doc.getInteger("idAmenity"),
+            doc.getInteger("id_amenities"),
             doc.getString("nombre"),
             doc.getString("descripcion")
     ) : null;
 }
 
 public void updateAmenity(int idAmenity, String nuevaDescripcion) {
-    MongoCollection<Document> collection = mongoDB.getCollection("Amenities");
-    collection.updateOne(Filters.eq("idAmenity", idAmenity), Updates.set("descripcion", nuevaDescripcion));
+    MongoCollection<Document> collection = mongoDB.getCollection("amenities");
+    collection.updateOne(Filters.eq("id_amenities", idAmenity), Updates.set("descripcion", nuevaDescripcion));
 }
 
 public void deleteAmenity(int idAmenity) {
-    MongoCollection<Document> collection = mongoDB.getCollection("Amenities");
-    collection.deleteOne(Filters.eq("idAmenity", idAmenity));
+    MongoCollection<Document> collection = mongoDB.getCollection("amenities");
+    collection.deleteOne(Filters.eq("id_amenities", idAmenity));
 }
 
 // CRUD para la entidad Zona
 public void createZona(Zona zona) {
-    MongoCollection<Document> collection = mongoDB.getCollection("Zonas");
-    Document document = new Document("idZona", zona.getIdZona())
+    MongoCollection<Document> collection = mongoDB.getCollection("zonas");
+    Document document = new Document("id_zona", zona.getIdZona())
             .append("nombre", zona.getNombre())
             .append("provincia", zona.getProvincia())
             .append("pais", zona.getPais())
@@ -229,10 +235,10 @@ public void createZona(Zona zona) {
 }
 
 public Zona readZona(int idZona) {
-    MongoCollection<Document> collection = mongoDB.getCollection("Zonas");
-    Document doc = collection.find(Filters.eq("idZona", idZona)).first();
+    MongoCollection<Document> collection = mongoDB.getCollection("zonas");
+    Document doc = collection.find(Filters.eq("id_zona", idZona)).first();
     return (doc != null) ? new Zona(
-            doc.getInteger("idZona"),
+            doc.getInteger("id_zona"),
             doc.getString("nombre"),
             doc.getString("provincia"),
             doc.getString("pais"),
@@ -241,19 +247,19 @@ public Zona readZona(int idZona) {
 }
 
 public void updateZona(int idZona, String nuevaDescripcion) {
-    MongoCollection<Document> collection = mongoDB.getCollection("Zonas");
-    collection.updateOne(Filters.eq("idZona", idZona), Updates.set("descripcion", nuevaDescripcion));
+    MongoCollection<Document> collection = mongoDB.getCollection("zonas");
+    collection.updateOne(Filters.eq("id_zona", idZona), Updates.set("descripcion", nuevaDescripcion));
 }
 
 public void deleteZona(int idZona) {
-    MongoCollection<Document> collection = mongoDB.getCollection("Zonas");
-    collection.deleteOne(Filters.eq("idZona", idZona));
+    MongoCollection<Document> collection = mongoDB.getCollection("zonas");
+    collection.deleteOne(Filters.eq("id_zona", idZona));
 }
 
 // CRUD para la entidad PuntoDeInteres
 public void createPuntoDeInteres(PuntoDeInteres poi) {
-    MongoCollection<Document> collection = mongoDB.getCollection("PuntosDeInteres");
-    Document document = new Document("idPoi", poi.getIdPoi())
+    MongoCollection<Document> collection = mongoDB.getCollection("pois");
+    Document document = new Document("id_poi", poi.getIdPoi())
             .append("nombre", poi.getNombre())
             .append("descripcion", poi.getDescripcion())
             .append("zona", poi.getZona());
@@ -261,10 +267,10 @@ public void createPuntoDeInteres(PuntoDeInteres poi) {
 }
 
 public PuntoDeInteres readPuntoDeInteres(int idPoi) {
-    MongoCollection<Document> collection = mongoDB.getCollection("PuntosDeInteres");
-    Document doc = collection.find(Filters.eq("idPoi", idPoi)).first();
+    MongoCollection<Document> collection = mongoDB.getCollection("pois");
+    Document doc = collection.find(Filters.eq("id_poi", idPoi)).first();
     return (doc != null) ? new PuntoDeInteres(
-            doc.getInteger("idPoi"),
+            doc.getInteger("id_poi"),
             doc.getString("nombre"),
             doc.getString("descripcion"),
             doc.getInteger("zona")
@@ -272,13 +278,13 @@ public PuntoDeInteres readPuntoDeInteres(int idPoi) {
 }
 
 public void updatePuntoDeInteres(int idPoi, String nuevaDescripcion) {
-    MongoCollection<Document> collection = mongoDB.getCollection("PuntosDeInteres");
-    collection.updateOne(Filters.eq("idPoi", idPoi), Updates.set("descripcion", nuevaDescripcion));
+    MongoCollection<Document> collection = mongoDB.getCollection("pois");
+    collection.updateOne(Filters.eq("id_poi", idPoi), Updates.set("descripcion", nuevaDescripcion));
 }
 
 public void deletePuntoDeInteres(int idPoi) {
-    MongoCollection<Document> collection = mongoDB.getCollection("PuntosDeInteres");
-    collection.deleteOne(Filters.eq("idPoi", idPoi));
+    MongoCollection<Document> collection = mongoDB.getCollection("pois");
+    collection.deleteOne(Filters.eq("id_poi", idPoi));
 }
 
     public int getUltimoIdHotel() {
