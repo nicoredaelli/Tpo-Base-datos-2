@@ -73,8 +73,11 @@ class EntityFormUI extends JFrame {
                 case "Crear":
                     if (entity.equals("Hotel")) {
                         // Crear un hotel
+                        int idHotel = controller.getUltimoIdHotel(); // Trae el ultimo ID existente de los hoteles (coleccion contadores)
+                        idHotel++; // el siguiente del ultimo en uso
                         Hotel hotel = new Hotel(
                                 new ObjectId(),
+                                idHotel,
                                 nombreField.getText(),
                                 telefonoField.getText(),
                                 emailField.getText(),
@@ -83,6 +86,7 @@ class EntityFormUI extends JFrame {
                                 Integer.parseInt(zonaField.getText())
                         );
                         controller.createHotel(hotel);
+
                     }
                     // Repite para otras entidades como Habitacion, Huesped, etc.
                     break;
@@ -90,7 +94,7 @@ class EntityFormUI extends JFrame {
                 case "Leer":
                     if (entity.equals("Hotel")) {
                         // Leer un hotel por ID
-                        ObjectId idHotel = new ObjectId(idField.getText());
+                        int idHotel = Integer.parseInt(idField.getText());
                         Hotel hotel = controller.readHotel(idHotel);
                         JOptionPane.showMessageDialog(this, hotel != null ? hotel.toString() : "Hotel no encontrado");
                     }

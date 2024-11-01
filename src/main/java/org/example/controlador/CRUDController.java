@@ -22,8 +22,9 @@ public class CRUDController {
 
     // CRUD para la entidad Hotel
     public void createHotel(Hotel hotel) {
-        MongoCollection<Document> collection = database.getCollection("Hoteles");
-        Document document = new Document("_id", hotel.getIdHotel())
+        MongoCollection<Document> collection = database.getCollection("hoteles");
+        Document document = new Document("_id", hotel.getObjectIDHotel())
+                .append("id_hotel", hotel.getIdHotel())
                 .append("nombre", hotel.getNombre())
                 .append("telefono", hotel.getTelefono())
                 .append("email", hotel.getEmail())
@@ -31,13 +32,15 @@ public class CRUDController {
                 .append("habitaciones", hotel.getHabitaciones())
                 .append("zona", hotel.getZona());
         collection.insertOne(document);
+        this.aumentarUltimoIdHotel();
     }
 
-    public Hotel readHotel(ObjectId idHotel) {
-        MongoCollection<Document> collection = database.getCollection("Hoteles");
-        Document doc = collection.find(Filters.eq("_id", idHotel)).first();
+    public Hotel readHotel(int idHotel) {
+        MongoCollection<Document> collection = database.getCollection("hoteles");
+        Document doc = collection.find(Filters.eq("id_hotel", idHotel)).first();
         return (doc != null) ? new Hotel(
                 doc.getObjectId("_id"),
+                doc.getInteger("id_hotel"),
                 doc.getString("nombre"),
                 doc.getString("telefono"),
                 doc.getString("email"),
@@ -48,12 +51,12 @@ public class CRUDController {
     }
 
     public void updateHotel(ObjectId idHotel, String nuevoNombre) {
-        MongoCollection<Document> collection = database.getCollection("Hoteles");
+        MongoCollection<Document> collection = database.getCollection("hoteles");
         collection.updateOne(Filters.eq("_id", idHotel), Updates.set("nombre", nuevoNombre));
     }
 
     public void deleteHotel(ObjectId idHotel) {
-        MongoCollection<Document> collection = database.getCollection("Hoteles");
+        MongoCollection<Document> collection = database.getCollection("hoteles");
         collection.deleteOne(Filters.eq("_id", idHotel));
     }
 
@@ -254,5 +257,17 @@ public void deletePuntoDeInteres(int idPoi) {
     MongoCollection<Document> collection = database.getCollection("PuntosDeInteres");
     collection.deleteOne(Filters.eq("idPoi", idPoi));
 }
+
+    public int getUltimoIdHotel() {
+        MongoCollection<Document> collection = database.getCollection("contadores");
+        Document resultado = collection.find(new Document("_id", "id_hotel"))
+                                .projection(new Document("_id", 0).append("seq", 1))
+                                .first();
+        return resultado.getInteger("seq");
+    }
+
+    public void aumentarUltimoIdHotel() {
+        database.getCollection("contadores").updateOne(new Document("_id", "id_hotel"), new Document("$inc", new Document("seq", 1)));
+    }
 
 }
