@@ -71,7 +71,6 @@ public class CRUDController {
         }
     }
     
-
     public Hotel readHotel(int idHotel) {
         try {
             // Obtener la colección de hoteles en MongoDB
@@ -184,7 +183,131 @@ public class CRUDController {
         }
     }
 
+    // CRUD para la entidad PuntoDeInteres
+    public void createPuntoDeInteres(PuntoDeInteres poi) {
+        // MongoDB
+        MongoCollection<Document> collection = mongoDB.getCollection("pois");
+        Document document = new Document("_id", poi.getObjectIDPoi())
+                .append("id_poi", poi.getIdPoi())
+                .append("nombre", poi.getNombre())
+                .append("descripcion", poi.getDescripcion())
+                .append("zona", poi.getZona());
+        collection.insertOne(document);
+        this.aumentarUltimoIdPuntoDeInteres();
 
+        // Neo4j
+        try (Session session = neo4jDB.session()) {
+            Zona zonaPoi = this.readZona(poi.getZona());
+            if (zonaPoi != null) {
+                session.writeTransaction(tx -> {
+                    tx.run(
+                            "MERGE (p:poi {id_poi: $id_poi, nombre: $nombre_poi}) " +
+                                    "MERGE (z:zona {id_zona: $id_zona, nombre: $nombre_zona}) " +
+                                    "MERGE (p)-[:PERTENECE]->(z)",
+                            Map.of(
+                                    "id_poi", poi.getIdPoi(),
+                                    "nombre_poi", poi.getNombre(),
+                                    "id_zona", zonaPoi.getIdZona(),
+                                    "nombre_zona", zonaPoi.getNombre()
+                            )
+                    );
+                    return null;
+                });
+            } else {
+                System.err.println("Zona no encontrada");
+            }
+        } catch (Exception e) {
+            System.err.println("Error al insertar el punto de interes en Neo4j: " + e.getMessage());
+        }
+
+    }
+
+    public PuntoDeInteres readPuntoDeInteres(int idPoi) {
+        MongoCollection<Document> collection = mongoDB.getCollection("pois");
+        Document doc = collection.find(Filters.eq("id_poi", idPoi)).first();
+        return (doc != null) ? new PuntoDeInteres(
+                doc.getObjectId("_id"),
+                doc.getInteger("id_poi"),
+                doc.getString("nombre"),
+                doc.getString("descripcion"),
+                doc.getInteger("zona")
+        ) : null;
+    }
+
+    public void updatePuntoDeInteres(int idPoi, String nuevoNombre, String nuevaDescripcion, int nuevaZona) {
+        MongoCollection<Document> collection = mongoDB.getCollection("pois");
+
+        // actualizar el punto de interes en MongoDB
+
+        collection.updateOne(
+                Filters.eq("id_poi", idPoi),
+                Updates.combine(
+                        Updates.set("nombre", nuevoNombre),
+                        Updates.set("descripcion", nuevaDescripcion),
+                        Updates.set("zona", nuevaZona)
+                )
+        );
+
+        // Neo4j: Actualizar la relación entre la zona y el punto de interes
+        try (Session session = neo4jDB.session()) {
+            // Primero, elimina la relación existente del punto de interes con la zona anterior
+            session.writeTransaction(tx -> {
+                tx.run(
+                        "MATCH (p:poi {id_poi: $id_poi})-[r:PERTENECE]->(z:zona) " +
+                                "DELETE r",
+                        Map.of("id_poi", idPoi)
+                );
+                return null;
+            });
+
+            // Luego, crea la nueva relación con la nueva zona
+            Zona nuevaZonaInfo = this.readZona(nuevaZona);  // Obtenemos la información de la nueva zona desde MongoDB
+            if (nuevaZonaInfo != null) {
+                session.writeTransaction(tx -> {
+                    tx.run(
+                            "MERGE (p:poi {id_poi: $id_poi, nombre: $nombre_poi}) " +
+                                    "MERGE (z:zona {id_zona: $id_zona, nombre: $nombre_zona}) " +
+                                    "MERGE (p)-[:PERTENECE]->(z)",
+                            Map.of(
+                                    "id_poi", idPoi,
+                                    "nombre_poi", nuevoNombre,
+                                    "id_zona", nuevaZonaInfo.getIdZona(),
+                                    "nombre_zona", nuevaZonaInfo.getNombre()
+                            )
+                    );
+                    return null;
+                });
+            } else {
+                System.err.println("Zona no encontrada en MongoDB");
+            }
+        } catch (Exception e) {
+            System.err.println("Error al actualizar el punto de interes en Neo4j: " + e.getMessage());
+        }
+    }
+
+    public void deletePuntoDeInteres(int idPoi) {
+        // Eliminar el punto de interes de la base de datos MongoDB
+        MongoCollection<Document> collection = mongoDB.getCollection("pois");
+        PuntoDeInteres puntoDeInteresAEliminar = this.readPuntoDeInteres(idPoi);
+
+        collection.deleteOne(Filters.eq("id_poi", puntoDeInteresAEliminar.getIdPoi()));
+
+        // Eliminar el punto de interes de base de datos Neo4j
+
+        try (Session session = neo4jDB.session()) {
+            session.writeTransaction(tx -> {
+                tx.run(
+                        "MATCH (p:poi {id_poi: $idPoi})-[r:PERTENECE]->(z:zona {id_zona: $idZona}) " +
+                                "DETACH DELETE p",
+                        Map.of("idPoi", puntoDeInteresAEliminar.getIdPoi(), "idZona", puntoDeInteresAEliminar.getZona())
+                );
+                return null;
+            });
+            System.out.println("Punto de interes eliminado de Neo4j con nombre: " + puntoDeInteresAEliminar.getNombre());
+        } catch (Exception e) {
+            System.err.println("Error al eliminar el punto de interes en Neo4j: " + e.getMessage());
+        }
+    }
 
 
 
@@ -361,37 +484,6 @@ public void deleteZona(int idZona) {
     collection.deleteOne(Filters.eq("id_zona", idZona));
 }
 
-// CRUD para la entidad PuntoDeInteres
-public void createPuntoDeInteres(PuntoDeInteres poi) {
-    MongoCollection<Document> collection = mongoDB.getCollection("pois");
-    Document document = new Document("id_poi", poi.getIdPoi())
-            .append("nombre", poi.getNombre())
-            .append("descripcion", poi.getDescripcion())
-            .append("zona", poi.getZona());
-    collection.insertOne(document);
-}
-
-public PuntoDeInteres readPuntoDeInteres(int idPoi) {
-    MongoCollection<Document> collection = mongoDB.getCollection("pois");
-    Document doc = collection.find(Filters.eq("id_poi", idPoi)).first();
-    return (doc != null) ? new PuntoDeInteres(
-            doc.getInteger("id_poi"),
-            doc.getString("nombre"),
-            doc.getString("descripcion"),
-            doc.getInteger("zona")
-    ) : null;
-}
-
-public void updatePuntoDeInteres(int idPoi, String nuevaDescripcion) {
-    MongoCollection<Document> collection = mongoDB.getCollection("pois");
-    collection.updateOne(Filters.eq("id_poi", idPoi), Updates.set("descripcion", nuevaDescripcion));
-}
-
-public void deletePuntoDeInteres(int idPoi) {
-    MongoCollection<Document> collection = mongoDB.getCollection("pois");
-    collection.deleteOne(Filters.eq("id_poi", idPoi));
-}
-
     public int getUltimoIdHotel() {
         MongoCollection<Document> collection = mongoDB.getCollection("contadores");
         Document resultado = collection.find(new Document("_id", "id_hotel"))
@@ -400,8 +492,20 @@ public void deletePuntoDeInteres(int idPoi) {
         return resultado.getInteger("seq");
     }
 
+    public int getUltimoIdPuntoDeInteres() {
+        MongoCollection<Document> collection = mongoDB.getCollection("contadores");
+        Document resultado = collection.find(new Document("_id", "id_poi"))
+                .projection(new Document("_id", 0).append("seq", 1))
+                .first();
+        return resultado.getInteger("seq");
+    }
+
     public void aumentarUltimoIdHotel() {
         mongoDB.getCollection("contadores").updateOne(new Document("_id", "id_hotel"), new Document("$inc", new Document("seq", 1)));
+    }
+
+    public void aumentarUltimoIdPuntoDeInteres() {
+        mongoDB.getCollection("contadores").updateOne(new Document("_id", "id_poi"), new Document("$inc", new Document("seq", 1)));
     }
 
 }

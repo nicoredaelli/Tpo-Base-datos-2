@@ -1,47 +1,48 @@
 package org.example.entidades;
 
 
+import org.bson.types.ObjectId;
 
 public class PuntoDeInteres {
+    private ObjectId objectIDPoi;
     private int idPoi;
     private String nombre;
     private String descripcion;
     private int zona;
 
-    public int getIdPoi() {
-        return idPoi;
+    public ObjectId getObjectIDPoi() {
+        return objectIDPoi;
     }
 
-    public void setIdPoi(int idPoi) {
-        this.idPoi = idPoi;
+    public int getIdPoi() {
+        return idPoi;
     }
 
     public String getNombre() {
         return nombre;
     }
 
-    public void setNombre(String nombre) {
-        this.nombre = nombre;
-    }
-
     public String getDescripcion() {
         return descripcion;
-    }
-
-    public void setDescripcion(String descripcion) {
-        this.descripcion = descripcion;
     }
 
     public int getZona() {
         return zona;
     }
 
-    public void setZona(int zona) {
-        this.zona = zona;
+    @Override
+    public String toString() {
+        return "PuntoDeInteres{" +
+                "idPoi=" + idPoi +
+                ", nombre='" + nombre + '\'' +
+                ", descripcion='" + descripcion + '\'' +
+                ", zona=" + zona +
+                '}';
     }
 
     // Constructor
-    public PuntoDeInteres(int idPoi, String nombre, String descripcion, int zona) {
+    public PuntoDeInteres(ObjectId objectIDPoi, int idPoi, String nombre, String descripcion, int zona) {
+        this.objectIDPoi = objectIDPoi;
         this.idPoi = idPoi;
         this.nombre = nombre;
         this.descripcion = descripcion;
