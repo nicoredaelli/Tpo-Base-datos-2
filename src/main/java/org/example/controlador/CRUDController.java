@@ -73,26 +73,36 @@ public class CRUDController {
             System.err.println("Error al insertar hotel en Neo4j: " + e.getMessage());
         }
     }
-    
+
     public Hotel readHotel(int idHotel) {
         try {
             // Obtener la colección de hoteles en MongoDB
-            MongoCollection<Document> collection = mongoDB.getCollection("hoteles");;
-    
+            MongoCollection<Document> collection = mongoDB.getCollection("hoteles");
+
             // Buscar el documento del hotel según el `id_hotel`
             Document doc = collection.find(Filters.eq("id_hotel", idHotel)).first();
-    
+
             // Si el documento existe, mapearlo a la clase `Hotel`
             if (doc != null) {
+                // Obtener `direccion` como un `Document` y convertirlo a un `Map`
+                Document direccionDoc = doc.get("direccion", Document.class);
+                Map<String, String> direccion = direccionDoc != null ? direccionDoc.entrySet()
+                        .stream()
+                        .collect(Collectors.toMap(Map.Entry::getKey, e -> e.getValue().toString()))
+                        : null;
+
+                // Obtener `habitaciones` como una lista de enteros
+                List<Integer> habitaciones = doc.getList("habitaciones", Integer.class);
+
                 return new Hotel(
-                    doc.getObjectId("_id"),
-                    doc.getInteger("id_hotel"),
-                    doc.getString("nombre"),
-                    doc.getString("telefono"),
-                    doc.getString("email"),
-                    (Map<String, String>) doc.get("direccion"),   // Casteo a `Map` para la dirección
-                    (List<Integer>) doc.get("habitaciones"),      // Casteo a `List` para las habitaciones
-                    doc.getInteger("zona")
+                        doc.getObjectId("_id"),
+                        doc.getInteger("id_hotel"),
+                        doc.getString("nombre"),
+                        doc.getString("telefono"),
+                        doc.getString("email"),
+                        direccion,
+                        habitaciones,
+                        doc.getInteger("zona")
                 );
             } else {
                 System.out.println("Hotel con id_hotel " + idHotel + " no encontrado en MongoDB.");
@@ -103,6 +113,7 @@ public class CRUDController {
             return null;
         }
     }
+
 
     public void updateHotel(int idHotel, String nuevoNombre, String nuevoTelefono, Map<String, String> nuevaDireccion, String nuevoEmail, int nuevaZona) {
 

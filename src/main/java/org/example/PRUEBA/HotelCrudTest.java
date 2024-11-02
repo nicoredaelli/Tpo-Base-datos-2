@@ -32,7 +32,7 @@ public class HotelCrudTest {
         Hotel nuevoHotel = new Hotel(
             new ObjectId(),        // Generar un nuevo ObjectId
                 idHotel,                     // idHotel, por ejemplo
-            "pepito hotel",       // Nombre del hotel
+            "hotelcitoooo",       // Nombre del hotel
             "+541123456789",       // Teléfono
             "contacto@hotel.com",  // Email
             direccion,             // Dirección
