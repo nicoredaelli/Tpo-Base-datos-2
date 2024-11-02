@@ -317,11 +317,12 @@ public void createAmenity(Amenity amenity) {
     // MongoDB
     try {
         MongoCollection<Document> collection = mongoDB.getCollection("amenities");
-        Document document = new Document("_id", amenity.getIdAmenity())
-                .append("idAmenity", amenity.getIdAmenity())
+        Document document = new Document("_id", amenity.getObjectIdAmenitie())
+                .append("id_amenity", amenity.getIdAmenity())
                 .append("nombre", amenity.getNombre())
                 .append("descripcion", amenity.getDescripcion());
         collection.insertOne(document);
+        this.aumentarUltimoIdAmenity();
         System.out.println("Amenity insertado en MongoDB: " + amenity.getNombre());
     } catch (Exception e) {
         System.err.println("Error al insertar amenity en MongoDB: " + e.getMessage());
@@ -330,7 +331,7 @@ public void createAmenity(Amenity amenity) {
     // Neo4j
     try (Session session = neo4jDB.session()) {
         session.writeTransaction(tx -> {
-            tx.run("MERGE (a:amenity {idAmenity: $idAmenity, nombre: $nombre, descripcion: $descripcion})",
+            tx.run("MERGE (a:amenity {id_amenity: $idAmenity, nombre: $nombre, descripcion: $descripcion})",
                     Map.of(
                             "idAmenity", amenity.getIdAmenity(),
                             "nombre", amenity.getNombre(),
@@ -348,15 +349,16 @@ public Amenity readAmenity(int idAmenity) {
     // MongoDB
     try {
         MongoCollection<Document> collection = mongoDB.getCollection("amenities");
-        Document doc = collection.find(Filters.eq("idAmenity", idAmenity)).first();
+        Document doc = collection.find(Filters.eq("id_amenity", idAmenity)).first();
         if (doc != null) {
             return new Amenity(
-                    doc.getInteger("idAmenity"),
+                    doc.getObjectId("_id"),
+                    doc.getInteger("id_amenity"),
                     doc.getString("nombre"),
                     doc.getString("descripcion")
             );
         } else {
-            System.out.println("Amenity no encontrado en MongoDB con idAmenity: " + idAmenity);
+            //System.out.println("Amenity no encontrado en MongoDB con idAmenity: " + idAmenity);
             return null;
         }
     } catch (Exception e) {
@@ -374,7 +376,7 @@ public void updateAmenity(Amenity amenity) {
         
         Document updateOperation = new Document("$set", updatedData);
         
-        collection.updateOne(Filters.eq("idAmenity", amenity.getIdAmenity()), updateOperation);
+        collection.updateOne(Filters.eq("id_amenity", amenity.getIdAmenity()), updateOperation);
         System.out.println("Amenity actualizado en MongoDB: " + amenity.getNombre());
     } catch (Exception e) {
         System.err.println("Error al actualizar amenity en MongoDB: " + e.getMessage());
@@ -383,10 +385,10 @@ public void updateAmenity(Amenity amenity) {
     // Neo4j
     try (Session session = neo4jDB.session()) {
         session.writeTransaction(tx -> {
-            tx.run("MATCH (a:amenity {idAmenity: $idAmenity}) " +
+            tx.run("MATCH (a:amenity {id_amenity: $id_amenity}) " +
                             "SET a.nombre = $nombre, a.descripcion = $descripcion",
                     Map.of(
-                            "idAmenity", amenity.getIdAmenity(),
+                            "id_amenity", amenity.getIdAmenity(),
                             "nombre", amenity.getNombre(),
                             "descripcion", amenity.getDescripcion()
                     ));
@@ -403,7 +405,7 @@ public void deleteAmenity(int idAmenity) {
     // MongoDB
     try {
         MongoCollection<Document> collection = mongoDB.getCollection("amenities");
-        collection.deleteOne(Filters.eq("idAmenity", idAmenity));
+        collection.deleteOne(Filters.eq("id_amenity", idAmenity));
         System.out.println("Amenity eliminado en MongoDB con idAmenity: " + idAmenity);
     } catch (Exception e) {
         System.err.println("Error al eliminar amenity en MongoDB: " + e.getMessage());
@@ -412,8 +414,8 @@ public void deleteAmenity(int idAmenity) {
     // Neo4j
     try (Session session = neo4jDB.session()) {
         session.writeTransaction(tx -> {
-            tx.run("MATCH (a:amenity {idAmenity: $idAmenity}) DELETE a",
-                    Map.of("idAmenity", idAmenity));
+            tx.run("MATCH (a:amenity{id_amenity: $id_amenity}) DELETE a",
+                    Map.of("id_amenity", idAmenity));
             return null;
         });
         System.out.println("Amenity eliminado en Neo4j con idAmenity: " + idAmenity);
@@ -433,15 +435,18 @@ public void deleteAmenity(int idAmenity) {
         try {
             // MongoDB: Insertar huesped
             MongoCollection<Document> collection = mongoDB.getCollection("huespedes");
-            Document doc = new Document("_id", huesped.getIdHuesped())
+            Document doc = new Document("_id", huesped.getObjectIdHuesped())
+                    .append("id_huesped", huesped.getIdHuesped())
                     .append("nombre", huesped.getNombre())
                     .append("apellido", huesped.getApellido())
                     .append("telefono", huesped.getTelefono())
                     .append("email", huesped.getEmail())
                     .append("direccion", huesped.getDireccion());
             collection.insertOne(doc);
+            this.aumentarUltimoIdHuesped();
             System.out.println("Huesped insertado en MongoDB.");
 
+            /*
             // Neo4j: Crear nodo de huesped
             try (Session session = neo4jDB.session()) {
                 try (Transaction tx = session.beginTransaction()) {
@@ -457,27 +462,35 @@ public void deleteAmenity(int idAmenity) {
                 tx.commit();
                 System.out.println("Huesped insertado en Neo4j.");
                 }
-            }
+            } */
         } catch (Exception e) {
             System.err.println("Error al crear Huesped: " + e.getMessage());
         }
     }
 
     // Read Huesped
-    public Huesped readHuesped(ObjectId idHuesped) {
+    public Huesped readHuesped(int idHuesped) {
         Huesped huesped = null;
         try {
             // MongoDB: Buscar huesped
             MongoCollection<Document> collection = mongoDB.getCollection("huespedes");
-            Document doc = collection.find(new Document("_id", idHuesped)).first();
+            Document doc = collection.find(new Document("id_huesped", idHuesped)).first();
             if (doc != null) {
+                // Obtener la dirección como un Document y convertirlo a Map
+                Document direccionDoc = doc.get("direccion", Document.class);
+                Map<String, String> direccion = direccionDoc != null ? direccionDoc.entrySet()
+                        .stream()
+                        .collect(Collectors.toMap(Map.Entry::getKey, e -> e.getValue().toString()))
+                        : null;
+
                 huesped = new Huesped(
                         doc.getObjectId("_id"),
+                        doc.getInteger("id_huesped"),
                         doc.getString("nombre"),
                         doc.getString("apellido"),
                         doc.getString("telefono"),
                         doc.getString("email"),
-                        (Map<String, String>) doc.get("direccion")
+                        direccion
                 );
             }
         } catch (Exception e) {
@@ -496,9 +509,10 @@ public void deleteAmenity(int idAmenity) {
                     .append("telefono", huesped.getTelefono())
                     .append("email", huesped.getEmail())
                     .append("direccion", huesped.getDireccion());
-            collection.updateOne(new Document("_id", huesped.getIdHuesped()), new Document("$set", updateDoc));
+            collection.updateOne(new Document("id_huesped", huesped.getIdHuesped()), new Document("$set", updateDoc));
             System.out.println("Huesped actualizado en MongoDB.");
 
+            /*
             // Neo4j: Actualizar nodo de huesped
             try (Session session = neo4jDB.session()) {
                 try (Transaction tx = session.beginTransaction()) {
@@ -514,20 +528,20 @@ public void deleteAmenity(int idAmenity) {
                 tx.commit();
                 System.out.println("Huesped actualizado en Neo4j.");
             }
-            }
+            }*/
         } catch (Exception e) {
             System.err.println("Error al actualizar Huesped: " + e.getMessage());
         }
     }
 
     // Delete Huesped
-    public void deleteHuesped(ObjectId idHuesped) {
+    public void deleteHuesped(int idHuesped) {
         try {
             // MongoDB: Eliminar huesped
             MongoCollection<Document> collection = mongoDB.getCollection("huespedes");
-            collection.deleteOne(new Document("_id", idHuesped));
+            collection.deleteOne(new Document("id_huesped", idHuesped));
             System.out.println("Huesped eliminado de MongoDB.");
-
+            /*
             // Neo4j: Eliminar nodo de huesped
             try (Session session = neo4jDB.session()) {
                 try (Transaction tx = session.beginTransaction()) {
@@ -536,7 +550,7 @@ public void deleteAmenity(int idAmenity) {
                 tx.commit();
                 System.out.println("Huesped eliminado de Neo4j.");
                 }   
-            }
+            }*/
         } catch (Exception e) {
             System.err.println("Error al eliminar Huesped: " + e.getMessage());
         }

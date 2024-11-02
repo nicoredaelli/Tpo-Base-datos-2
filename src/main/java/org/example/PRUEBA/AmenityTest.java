@@ -1,53 +1,42 @@
 package org.example.PRUEBA;
 
+import org.bson.types.ObjectId;
 import org.example.controlador.CRUDController;
 import org.example.entidades.Amenity;
 
+import java.util.List;
+
 public class AmenityTest {
     public static void main(String[] args) {
-        // Instancia del controlador CRUD
-        CRUDController controller = new CRUDController();
+        CRUDController amenityCRUD = new CRUDController();
 
-        // Crear un nuevo amenity
-        Amenity newAmenity = new Amenity(1, "Piscina", "Piscina climatizada en la azotea");
-        System.out.println("Creando Amenity...");
-        controller.createAmenity(newAmenity);
+        int idAmenity = amenityCRUD.getUltimoIdAmenity() + 1;
 
-        // Leer el amenity creado
-        System.out.println("\nLeyendo Amenity creado:");
-        Amenity retrievedAmenity = controller.readAmenity(newAmenity.getIdAmenity());
-        if (retrievedAmenity != null) {
-            System.out.println("Amenity encontrado: " + retrievedAmenity.getNombre() + " - " + retrievedAmenity.getDescripcion());
+        // Crear un nuevo Amenity
+        System.out.println("Creando un nuevo Amenity...");
+        Amenity nuevoAmenity = new Amenity(new ObjectId(), idAmenity, "cama doble", "cama doble");
+        amenityCRUD.createAmenity(nuevoAmenity);
+        System.out.println("Amenity creado: " + nuevoAmenity.getNombre());
+
+        // Leer el Amenity creado
+        System.out.println("\nLeyendo el Amenity creado...");
+        Amenity amenityLeido = amenityCRUD.readAmenity(nuevoAmenity.getIdAmenity());
+        if (amenityLeido != null) {
+            System.out.println("Amenity leído: " + amenityLeido.toString());
         } else {
-            System.out.println("No se encontró el amenity en la base de datos.");
+            System.out.println("Amenity no encontrado.");
         }
 
-        // Actualizar el amenity
-        System.out.println("\nActualizando Amenity...");
-        retrievedAmenity.setNombre("Piscina Exterior");
-        retrievedAmenity.setDescripcion("Piscina con vista panorámica");
-        controller.updateAmenity(retrievedAmenity);
+        // Actualizar el Amenity
+        System.out.println("\nActualizando el Amenity...");
+        nuevoAmenity.setDescripcion("pepe");
+        amenityCRUD.updateAmenity(nuevoAmenity);
+        System.out.println("Amenity actualizado.");
 
-        // Leer el amenity actualizado
-        System.out.println("\nLeyendo Amenity actualizado:");
-        Amenity updatedAmenity = controller.readAmenity(retrievedAmenity.getIdAmenity());
-        if (updatedAmenity != null) {
-            System.out.println("Amenity actualizado: " + updatedAmenity.getNombre() + " - " + updatedAmenity.getDescripcion());
-        } else {
-            System.out.println("No se encontró el amenity en la base de datos después de la actualización.");
-        }
+        // Eliminar el Amenity
+        System.out.println("\nEliminando el Amenity...");
+        amenityCRUD.deleteAmenity(nuevoAmenity.getIdAmenity());
+        System.out.println("Amenity eliminado.");
 
-        // Eliminar el amenity
-        System.out.println("\nEliminando Amenity...");
-        controller.deleteAmenity(retrievedAmenity.getIdAmenity());
-
-        // Intentar leer el amenity eliminado
-        System.out.println("\nVerificando eliminación del Amenity:");
-        Amenity deletedAmenity = controller.readAmenity(retrievedAmenity.getIdAmenity());
-        if (deletedAmenity == null) {
-            System.out.println("Amenity eliminado exitosamente.");
-        } else {
-            System.out.println("Error: el amenity todavía existe en la base de datos.");
-        }
     }
 }

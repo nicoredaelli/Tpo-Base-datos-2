@@ -1,8 +1,10 @@
 package org.example.entidades;
 
 
+import org.bson.types.ObjectId;
 
 public class Amenity {
+    private ObjectId ObjectIdAmenitie;
     private int idAmenity;
     private String nombre;
     private String descripcion;
@@ -11,8 +13,8 @@ public class Amenity {
         return idAmenity;
     }
 
-    public void setIdAmenity(int idAmenity) {
-        this.idAmenity = idAmenity;
+    public ObjectId getObjectIdAmenitie() {
+        return ObjectIdAmenitie;
     }
 
     public String getNombre() {
@@ -31,8 +33,18 @@ public class Amenity {
         this.descripcion = descripcion;
     }
 
+    @Override
+    public String toString() {
+        return "Amenity{" +
+                "idAmenity=" + idAmenity +
+                ", nombre='" + nombre + '\'' +
+                ", descripcion='" + descripcion + '\'' +
+                '}';
+    }
+
     // Constructor
-    public Amenity(int idAmenity, String nombre, String descripcion) {
+    public Amenity(ObjectId objectIdAmenitie, int idAmenity, String nombre, String descripcion) {
+        this.ObjectIdAmenitie = objectIdAmenitie;
         this.idAmenity = idAmenity;
         this.nombre = nombre;
         this.descripcion = descripcion;

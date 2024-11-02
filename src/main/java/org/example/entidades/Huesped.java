@@ -5,63 +5,77 @@ import java.util.Map;
 import org.bson.types.ObjectId;
 
 public class Huesped {
-     private ObjectId idHuesped;
+    private ObjectId objectIdHuesped;
+    private int idHuesped;
     private String nombre;
     private String apellido;
     private String telefono;
     private String email;
     private Map<String, String> direccion;
 
-    public ObjectId getIdHuesped() {
+    public int getIdHuesped() {
         return idHuesped;
-    }
-
-    public void setIdHuesped(ObjectId idHuesped) {
-        this.idHuesped = idHuesped;
     }
 
     public String getNombre() {
         return nombre;
     }
 
-    public void setNombre(String nombre) {
-        this.nombre = nombre;
-    }
-
     public String getApellido() {
         return apellido;
-    }
-
-    public void setApellido(String apellido) {
-        this.apellido = apellido;
     }
 
     public String getTelefono() {
         return telefono;
     }
 
-    public void setTelefono(String telefono) {
-        this.telefono = telefono;
-    }
-
     public String getEmail() {
         return email;
-    }
-
-    public void setEmail(String email) {
-        this.email = email;
     }
 
     public Map<String, String> getDireccion() {
         return direccion;
     }
 
-    public void setDireccion(Map<String, String> direccion) {
-        this.direccion = direccion;
+    public ObjectId getObjectIdHuesped() {
+        return objectIdHuesped;
+    }
+
+    public void setTelefono(String telefono) {
+        this.telefono = telefono;
+    }
+
+    public void setEmail(String email) {
+        this.email = email;
+    }
+
+    @Override
+    public String toString() {
+        StringBuilder direccionStr = new StringBuilder();
+        if (direccion != null) {
+            direccionStr.append("{");
+            direccion.forEach((key, value) -> direccionStr.append(key).append(": ").append(value).append(", "));
+            if (direccionStr.length() > 1) {
+                direccionStr.setLength(direccionStr.length() - 2); // Elimina la última coma y espacio
+            }
+            direccionStr.append("}");
+        } else {
+            direccionStr.append("null");
+        }
+
+        return "Huesped{" +
+                "idHuesped=" + idHuesped +
+                ", nombre='" + nombre + '\'' +
+                ", apellido='" + apellido + '\'' +
+                ", telefono='" + telefono + '\'' +
+                ", email='" + email + '\'' +
+                ", direccion=" + direccionStr +
+                '}';
     }
 
     // Constructor
-    public Huesped(ObjectId idHuesped, String nombre, String apellido, String telefono, String email, Map<String, String> direccion) {
+    public Huesped(ObjectId objectIdHuesped, int idHuesped, String nombre, String apellido, String telefono, String email, Map<String, String> direccion) {
+        this.objectIdHuesped = objectIdHuesped;
         this.idHuesped = idHuesped;
         this.nombre = nombre;
         this.apellido = apellido;
