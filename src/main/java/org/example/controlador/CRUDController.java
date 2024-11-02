@@ -15,6 +15,7 @@ import org.neo4j.driver.Session;
 import org.neo4j.driver.Transaction;
 import org.neo4j.driver.Values;
 
+import java.time.ZoneId;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -439,6 +440,275 @@ public void deleteAmenity(int idAmenity) {
 //------------------------------------------------------------------------------------------------------------------------------------
     // CRUD para la entidad Habitacion neo4jDB mongoDB
 //------------------------------------------------------------------------------------------------------------------------------------
+// CRUD para la entidad Habitacion
+public void createHabitacion(Habitacion habitacion) {
+    // MongoDB
+    try {
+        MongoCollection<Document> collection = mongoDB.getCollection("habitaciones");
+        Document document = new Document("_id", new ObjectId())
+                .append("nro_habitacion", habitacion.getNroHabitacion())
+                .append("id_hotel", habitacion.getIdHotel())
+                .append("tipo_habitacion", habitacion.getTipoHabitacion())
+                .append("amenities", habitacion.getAmenities());
+        collection.insertOne(document);
+        System.out.println("Habitación insertada en MongoDB: " + habitacion.getNroHabitacion());
+    } catch (Exception e) {
+        System.err.println("Error al insertar habitación en MongoDB: " + e.getMessage());
+    }
+
+    // Neo4j
+    try (Session session = neo4jDB.session()) {
+        session.writeTransaction(tx -> {
+            tx.run("MERGE (h:habitacion {nro_habitacion: $nroHabitacion, tipo_habitacion: $tipoHabitacion}) " +
+                            "WITH h " +
+                            "MATCH (hotel:hotel {id_hotel: $idHotel}) " +
+                            "MERGE (hotel)-[:TIENE_HABITACION]->(h) " +
+                            "WITH h " +
+                            "UNWIND $amenities AS amenityId " +
+                            "MATCH (a:amenity {id_amenity: amenityId}) " +
+                            "MERGE (h)-[:TIENE_AMENITY]->(a)",
+                    Map.of(
+                            "nroHabitacion", habitacion.getNroHabitacion(),
+                            "tipoHabitacion", habitacion.getTipoHabitacion(),
+                            "idHotel", habitacion.getIdHotel().toString(),
+                            "amenities", habitacion.getAmenities()
+                    ));
+            return null;
+        });
+        System.out.println("Habitación insertada en Neo4j: " + habitacion.getNroHabitacion());
+    } catch (Exception e) {
+        System.err.println("Error al insertar habitación en Neo4j: " + e.getMessage());
+    }
+}
+
+public Habitacion readHabitacion(int nroHabitacion) {
+    // MongoDB
+    try {
+        MongoCollection<Document> collection = mongoDB.getCollection("habitaciones");
+        Document doc = collection.find(Filters.eq("nro_habitacion", nroHabitacion)).first();
+        if (doc != null) {
+            return new Habitacion(
+                    doc.getInteger("nro_habitacion"),
+                    new ObjectId(doc.getString("id_hotel")),
+                    doc.getString("tipo_habitacion"),
+                    doc.getList("amenities", Integer.class)
+            );
+        } else {
+            System.out.println("Habitación no encontrada en MongoDB con nroHabitacion: " + nroHabitacion);
+            return null;
+        }
+    } catch (Exception e) {
+        System.err.println("Error al leer habitación de MongoDB: " + e.getMessage());
+        return null;
+    }
+}
+
+public void updateHabitacion(Habitacion habitacion) {
+    // MongoDB
+    try {
+        MongoCollection<Document> collection = mongoDB.getCollection("habitaciones");
+        Document updatedData = new Document("id_hotel", habitacion.getIdHotel())
+                .append("tipo_habitacion", habitacion.getTipoHabitacion())
+                .append("amenities", habitacion.getAmenities());
+        
+        Document updateOperation = new Document("$set", updatedData);
+        
+        collection.updateOne(Filters.eq("nro_habitacion", habitacion.getNroHabitacion()), updateOperation);
+        System.out.println("Habitación actualizada en MongoDB: " + habitacion.getNroHabitacion());
+    } catch (Exception e) {
+        System.err.println("Error al actualizar habitación en MongoDB: " + e.getMessage());
+    }
+
+    // Neo4j
+    try (Session session = neo4jDB.session()) {
+        session.writeTransaction(tx -> {
+            tx.run("MATCH (h:habitacion {nro_habitacion: $nroHabitacion}) " +
+                            "SET h.tipo_habitacion = $tipoHabitacion " +
+                            "WITH h " +
+                            "MATCH (hotel:hotel {id_hotel: $idHotel}) " +
+                            "MERGE (hotel)-[:TIENE_HABITACION]->(h) " +
+                            "WITH h " +
+                            "MATCH (h)-[r:TIENE_AMENITY]->() DELETE r " +
+                            "WITH h " +
+                            "UNWIND $amenities AS amenityId " +
+                            "MATCH (a:amenity {id_amenity: amenityId}) " +
+                            "MERGE (h)-[:TIENE_AMENITY]->(a)",
+                    Map.of(
+                            "nroHabitacion", habitacion.getNroHabitacion(),
+                            "tipoHabitacion", habitacion.getTipoHabitacion(),
+                            "idHotel", habitacion.getIdHotel().toString(),
+                            "amenities", habitacion.getAmenities()
+                    ));
+            return null;
+        });
+        System.out.println("Habitación actualizada en Neo4j: " + habitacion.getNroHabitacion());
+    } catch (Exception e) {
+        System.err.println("Error al actualizar habitación en Neo4j: " + e.getMessage());
+    }
+}
+
+public void deleteHabitacion(int nroHabitacion) {
+    // MongoDB
+    try {
+        MongoCollection<Document> collection = mongoDB.getCollection("habitaciones");
+        collection.deleteOne(Filters.eq("nro_habitacion", nroHabitacion));
+        System.out.println("Habitación eliminada en MongoDB con nroHabitacion: " + nroHabitacion);
+    } catch (Exception e) {
+        System.err.println("Error al eliminar habitación en MongoDB: " + e.getMessage());
+    }
+
+    // Neo4j
+    try (Session session = neo4jDB.session()) {
+        session.writeTransaction(tx -> {
+            tx.run("MATCH (h:habitacion {nro_habitacion: $nroHabitacion}) DETACH DELETE h",
+                    Map.of("nroHabitacion", nroHabitacion));
+            return null;
+        });
+        System.out.println("Habitación eliminada en Neo4j con nroHabitacion: " + nroHabitacion);
+    } catch (Exception e) {
+        System.err.println("Error al eliminar habitación en Neo4j: " + e.getMessage());
+    }
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------
+    // CRUD para la entidad Reserva
+public void createReserva(Reserva reserva) {
+    // MongoDB
+    try {
+        MongoCollection<Document> collection = mongoDB.getCollection("reservas");
+        Document document = new Document("_id", new ObjectId())
+                .append("cod_reserva", reserva.getCodReserva())
+                .append("checkin", reserva.getCheckin())
+                .append("checkout", reserva.getCheckout())
+                .append("estado_reserva", reserva.getEstadoReserva())
+                .append("tarifa", reserva.getTarifa())
+                .append("id_hotel", reserva.getIdHotel())
+                .append("id_habitacion", reserva.getIdHabitacion())
+                .append("id_huesped", reserva.getIdHuesped());
+        collection.insertOne(document);
+        this.aumentarUltimoIdReserva();
+        System.out.println("Reserva insertada en MongoDB: " + reserva.getCodReserva());
+    } catch (Exception e) {
+        System.err.println("Error al insertar reserva en MongoDB: " + e.getMessage());
+    }
+
+    // Neo4j
+    try (Session session = neo4jDB.session()) {
+        session.writeTransaction(tx -> {
+            tx.run("MERGE (r:reserva {cod_reserva: $codReserva, checkin: $checkin, checkout: $checkout, estado_reserva: $estadoReserva, tarifa: $tarifa, id_hotel: $idHotel, id_habitacion: $idHabitacion, id_huesped: $idHuesped})",
+                    Map.of(
+                            "codReserva", reserva.getCodReserva(),
+                            "checkin", reserva.getCheckin(),
+                            "checkout", reserva.getCheckout(),
+                            "estadoReserva", reserva.getEstadoReserva(),
+                            "tarifa", reserva.getTarifa(),
+                            "idHotel", reserva.getIdHotel().toString(),
+                            "idHabitacion", reserva.getIdHabitacion(),
+                            "idHuesped", reserva.getIdHuesped().toString()
+                    ));
+            return null;
+        });
+        System.out.println("Reserva insertada en Neo4j: " + reserva.getCodReserva());
+    } catch (Exception e) {
+        System.err.println("Error al insertar reserva en Neo4j: " + e.getMessage());
+    }
+}
+
+public Reserva readReserva(int codReserva) {
+    // MongoDB
+    try {
+        MongoCollection<Document> collection = mongoDB.getCollection("reservas");
+        Document doc = collection.find(Filters.eq("cod_reserva", codReserva)).first();
+        if (doc != null) {
+            return new Reserva(
+                    doc.getInteger("cod_reserva"),
+                    doc.getString("checkin"),
+                    doc.getString("checkout"),
+                    doc.getString("estado_reserva"),
+                    doc.getDouble("tarifa"),
+                    new ObjectId(doc.getString("id_hotel")),
+                    doc.getInteger("id_habitacion"),
+                    new ObjectId(doc.getString("id_huesped"))
+            );
+        } else {
+            System.out.println("Reserva no encontrada en MongoDB con codReserva: " + codReserva);
+            return null;
+        }
+    } catch (Exception e) {
+        System.err.println("Error al leer reserva de MongoDB: " + e.getMessage());
+        return null;
+    }
+}
+
+public void updateReserva(Reserva reserva) {
+    // MongoDB
+    try {
+        MongoCollection<Document> collection = mongoDB.getCollection("reservas");
+        Document updatedData = new Document("checkin", reserva.getCheckin())
+                .append("checkout", reserva.getCheckout())
+                .append("estado_reserva", reserva.getEstadoReserva())
+                .append("tarifa", reserva.getTarifa())
+                .append("id_hotel", reserva.getIdHotel())
+                .append("id_habitacion", reserva.getIdHabitacion())
+                .append("id_huesped", reserva.getIdHuesped());
+        
+        Document updateOperation = new Document("$set", updatedData);
+        
+        collection.updateOne(Filters.eq("cod_reserva", reserva.getCodReserva()), updateOperation);
+        System.out.println("Reserva actualizada en MongoDB: " + reserva.getCodReserva());
+    } catch (Exception e) {
+        System.err.println("Error al actualizar reserva en MongoDB: " + e.getMessage());
+    }
+
+    // Neo4j
+    try (Session session = neo4jDB.session()) {
+        session.writeTransaction(tx -> {
+            tx.run("MATCH (r:reserva {cod_reserva: $codReserva}) " +
+                            "SET r.checkin = $checkin, r.checkout = $checkout, r.estado_reserva = $estadoReserva, r.tarifa = $tarifa, r.id_hotel = $idHotel, r.id_habitacion = $idHabitacion, r.id_huesped = $idHuesped",
+                    Map.of(
+                            "codReserva", reserva.getCodReserva(),
+                            "checkin", reserva.getCheckin(),
+                            "checkout", reserva.getCheckout(),
+                            "estadoReserva", reserva.getEstadoReserva(),
+                            "tarifa", reserva.getTarifa(),
+                            "idHotel", reserva.getIdHotel().toString(),
+                            "idHabitacion", reserva.getIdHabitacion(),
+                            "idHuesped", reserva.getIdHuesped().toString()
+                    ));
+            return null;
+        });
+        System.out.println("Reserva actualizada en Neo4j: " + reserva.getCodReserva());
+    } catch (Exception e) {
+        System.err.println("Error al actualizar reserva en Neo4j: " + e.getMessage());
+    }
+}
+
+public void deleteReserva(int codReserva) {
+    // MongoDB
+    try {
+        MongoCollection<Document> collection = mongoDB.getCollection("reservas");
+        collection.deleteOne(Filters.eq("cod_reserva", codReserva));
+        System.out.println("Reserva eliminada en MongoDB con codReserva: " + codReserva);
+    } catch (Exception e) {
+        System.err.println("Error al eliminar reserva en MongoDB: " + e.getMessage());
+    }
+
+    // Neo4j
+    try (Session session = neo4jDB.session()) {
+        session.writeTransaction(tx -> {
+            tx.run("MATCH (r:reserva {cod_reserva: $codReserva}) DELETE r",
+                    Map.of("codReserva", codReserva));
+            return null;
+        });
+        System.out.println("Reserva eliminada en Neo4j con codReserva: " + codReserva);
+    } catch (Exception e) {
+        System.err.println("Error al eliminar reserva en Neo4j: " + e.getMessage());
+    }
+}
+
+
+
+//------------------------------------------------------------------------------------------------------------------------------------
     // CRUD para la entidad Huesped
 
      // Create Huesped
@@ -655,6 +925,19 @@ public void deleteZona(int idZona) {
 
     public void aumentarUltimoIdPuntoDeInteres() {
         mongoDB.getCollection("contadores").updateOne(new Document("_id", "id_poi"), new Document("$inc", new Document("seq", 1)));
+    }
+
+
+    public int getUltimoIdReserva() {
+        MongoCollection<Document> collection = mongoDB.getCollection("contadores");
+        Document resultado = collection.find(new Document("_id", "id_reserva"))
+                                    .projection(new Document("_id", 0).append("seq", 1))
+                                    .first();
+        return resultado.getInteger("seq");
+    }
+    
+    public void aumentarUltimoIdReserva() {
+        mongoDB.getCollection("contadores").updateOne(new Document("_id", "id_reserva"), new Document("$inc", new Document("seq", 1)));
     }
 
 }
