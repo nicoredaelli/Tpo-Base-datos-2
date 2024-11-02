@@ -12,9 +12,12 @@ import org.example.conexionneo4j.Neo4jDBConnection;
 import org.example.entidades.*;
 import org.neo4j.driver.Driver;
 import org.neo4j.driver.Session;
+import org.neo4j.driver.Transaction;
+import org.neo4j.driver.Values;
 
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 public class CRUDController {
 
@@ -182,7 +185,7 @@ public class CRUDController {
             System.err.println("Error al eliminar el hotel en Neo4j: " + e.getMessage());
         }
     }
-
+//---------------------------------------------------------------------------------------------------------------------------------
     // CRUD para la entidad PuntoDeInteres
     public void createPuntoDeInteres(PuntoDeInteres poi) {
         // MongoDB
@@ -308,150 +311,241 @@ public class CRUDController {
             System.err.println("Error al eliminar el punto de interes en Neo4j: " + e.getMessage());
         }
     }
-
-
-
-
-
-
-
-
-
-    // CRUD para la entidad Habitacion
-    public void createHabitacion(Habitacion habitacion) {
-        MongoCollection<Document> collection = mongoDB.getCollection("habitaciones");
-        Document document = new Document("nroHabitacion", habitacion.getNroHabitacion())
-                .append("idHotel", habitacion.getIdHotel())
-                .append("tipoHabitacion", habitacion.getTipoHabitacion())
-                .append("amenities", habitacion.getAmenities());
-        collection.insertOne(document);
-    }
-
-    public Habitacion readHabitacion(int nroHabitacion) {
-        MongoCollection<Document> collection = mongoDB.getCollection("habitaciones");
-        Document doc = collection.find(Filters.eq("nroHabitacion", nroHabitacion)).first();
-        return (doc != null) ? new Habitacion(
-                doc.getInteger("nroHabitacion"),
-                doc.getObjectId("idHotel"),
-                doc.getString("tipoHabitacion"),
-                (List<Integer>) doc.get("amenities")
-        ) : null;
-    }
-
-    public void updateHabitacion(int nroHabitacion, String nuevoTipoHabitacion) {
-        MongoCollection<Document> collection = mongoDB.getCollection("habitaciones");
-        collection.updateOne(Filters.eq("nroHabitacion", nroHabitacion), Updates.set("tipoHabitacion", nuevoTipoHabitacion));
-    }
-
-    public void deleteHabitacion(int nroHabitacion) {
-        MongoCollection<Document> collection = mongoDB.getCollection("habitaciones");
-        collection.deleteOne(Filters.eq("nroHabitacion", nroHabitacion));
-    }
-
-    // CRUD para la entidad Huesped
-    public void createHuesped(Huesped huesped) {
-        MongoCollection<Document> collection = mongoDB.getCollection("huespedes");
-        Document document = new Document("_id", huesped.getIdHuesped())
-                .append("nombre", huesped.getNombre())
-                .append("apellido", huesped.getApellido())
-                .append("telefono", huesped.getTelefono())
-                .append("email", huesped.getEmail())
-                .append("direccion", huesped.getDireccion());
-        collection.insertOne(document);
-    }
-
-    public Huesped readHuesped(ObjectId idHuesped) {
-        MongoCollection<Document> collection = mongoDB.getCollection("huespedes");
-        Document doc = collection.find(Filters.eq("_id", idHuesped)).first();
-        return (doc != null) ? new Huesped(
-                doc.getObjectId("_id"),
-                doc.getString("nombre"),
-                doc.getString("apellido"),
-                doc.getString("telefono"),
-                doc.getString("email"),
-                (Map<String, String>) doc.get("direccion")
-        ) : null;
-    }
-
-    public void updateHuesped(ObjectId idHuesped, String nuevoEmail) {
-        MongoCollection<Document> collection = mongoDB.getCollection("huespedes");
-        collection.updateOne(Filters.eq("_id", idHuesped), Updates.set("email", nuevoEmail));
-    }
-
-    public void deleteHuesped(ObjectId idHuesped) {
-        MongoCollection<Document> collection = mongoDB.getCollection("huespedes");
-        collection.deleteOne(Filters.eq("_id", idHuesped));
-    }
-
-    // CRUD para la entidad Reserva
-    public void createReserva(Reserva reserva) {
-        MongoCollection<Document> collection = mongoDB.getCollection("reservas");
-        Document document = new Document("cod_reserva", reserva.getCodReserva())
-                .append("checkin", reserva.getCheckin())
-                .append("checkout", reserva.getCheckout())
-                .append("estado_reserva", reserva.getEstadoReserva())
-                .append("tarifa", reserva.getTarifa())
-                .append("id_hotel", reserva.getIdHotel())
-                .append("id_habitacion", reserva.getIdHabitacion())
-                .append("id_huesped", reserva.getIdHuesped());
-        collection.insertOne(document);
-    }
-
-    public Reserva readReserva(int codReserva) {
-        MongoCollection<Document> collection = mongoDB.getCollection("reservas");
-        Document doc = collection.find(Filters.eq("cod_reserva", codReserva)).first();
-        return (doc != null) ? new Reserva(
-                doc.getInteger("cod_reserva"),
-                doc.getString("checkin"),
-                doc.getString("checkout"),
-                doc.getString("estado_reserva"),
-                doc.getDouble("tarifa"),
-                doc.getObjectId("id_hotel"),
-                doc.getInteger("id_habitacion"),
-                doc.getObjectId("id_huesped")
-        ) : null;
-    }
-
-    public void updateReserva(int codReserva, String nuevoEstado) {
-        MongoCollection<Document> collection = mongoDB.getCollection("reservas");
-        collection.updateOne(Filters.eq("cod_reserva", codReserva), Updates.set("estadoReserva", nuevoEstado));
-    }
-
-    public void deleteReserva(int codReserva) {
-        MongoCollection<Document> collection = mongoDB.getCollection("reservas");
-        collection.deleteOne(Filters.eq("cod_reserva", codReserva));
-    }
-
-    // CRUD para la entidad Amenity
+//--------------------------------------------------------------------------------------------------------------------------------
+// CRUD para la entidad Amenity
 public void createAmenity(Amenity amenity) {
-    MongoCollection<Document> collection = mongoDB.getCollection("amenities");
-    Document document = new Document("id_amenities", amenity.getIdAmenity())
-            .append("nombre", amenity.getNombre())
-            .append("descripcion", amenity.getDescripcion());
-    collection.insertOne(document);
+    // MongoDB
+    try {
+        MongoCollection<Document> collection = mongoDB.getCollection("amenities");
+        Document document = new Document("_id", amenity.getIdAmenity())
+                .append("idAmenity", amenity.getIdAmenity())
+                .append("nombre", amenity.getNombre())
+                .append("descripcion", amenity.getDescripcion());
+        collection.insertOne(document);
+        System.out.println("Amenity insertado en MongoDB: " + amenity.getNombre());
+    } catch (Exception e) {
+        System.err.println("Error al insertar amenity en MongoDB: " + e.getMessage());
+    }
+
+    // Neo4j
+    try (Session session = neo4jDB.session()) {
+        session.writeTransaction(tx -> {
+            tx.run("MERGE (a:amenity {idAmenity: $idAmenity, nombre: $nombre, descripcion: $descripcion})",
+                    Map.of(
+                            "idAmenity", amenity.getIdAmenity(),
+                            "nombre", amenity.getNombre(),
+                            "descripcion", amenity.getDescripcion()
+                    ));
+            return null;
+        });
+        System.out.println("Amenity insertado en Neo4j: " + amenity.getNombre());
+    } catch (Exception e) {
+        System.err.println("Error al insertar amenity en Neo4j: " + e.getMessage());
+    }
 }
 
 public Amenity readAmenity(int idAmenity) {
-    MongoCollection<Document> collection = mongoDB.getCollection("amenities");
-    Document doc = collection.find(Filters.eq("id_amenities", idAmenity)).first();
-    return (doc != null) ? new Amenity(
-            doc.getInteger("id_amenities"),
-            doc.getString("nombre"),
-            doc.getString("descripcion")
-    ) : null;
+    // MongoDB
+    try {
+        MongoCollection<Document> collection = mongoDB.getCollection("amenities");
+        Document doc = collection.find(Filters.eq("idAmenity", idAmenity)).first();
+        if (doc != null) {
+            return new Amenity(
+                    doc.getInteger("idAmenity"),
+                    doc.getString("nombre"),
+                    doc.getString("descripcion")
+            );
+        } else {
+            System.out.println("Amenity no encontrado en MongoDB con idAmenity: " + idAmenity);
+            return null;
+        }
+    } catch (Exception e) {
+        System.err.println("Error al leer amenity de MongoDB: " + e.getMessage());
+        return null;
+    }
 }
 
-public void updateAmenity(int idAmenity, String nuevaDescripcion) {
-    MongoCollection<Document> collection = mongoDB.getCollection("amenities");
-    collection.updateOne(Filters.eq("id_amenities", idAmenity), Updates.set("descripcion", nuevaDescripcion));
+public void updateAmenity(Amenity amenity) {
+    // MongoDB
+    try {
+        MongoCollection<Document> collection = mongoDB.getCollection("amenities");
+        Document updatedData = new Document("nombre", amenity.getNombre())
+                .append("descripcion", amenity.getDescripcion());
+        
+        Document updateOperation = new Document("$set", updatedData);
+        
+        collection.updateOne(Filters.eq("idAmenity", amenity.getIdAmenity()), updateOperation);
+        System.out.println("Amenity actualizado en MongoDB: " + amenity.getNombre());
+    } catch (Exception e) {
+        System.err.println("Error al actualizar amenity en MongoDB: " + e.getMessage());
+    }
+
+    // Neo4j
+    try (Session session = neo4jDB.session()) {
+        session.writeTransaction(tx -> {
+            tx.run("MATCH (a:amenity {idAmenity: $idAmenity}) " +
+                            "SET a.nombre = $nombre, a.descripcion = $descripcion",
+                    Map.of(
+                            "idAmenity", amenity.getIdAmenity(),
+                            "nombre", amenity.getNombre(),
+                            "descripcion", amenity.getDescripcion()
+                    ));
+            return null;
+        });
+        System.out.println("Amenity actualizado en Neo4j: " + amenity.getNombre());
+    } catch (Exception e) {
+        System.err.println("Error al actualizar amenity en Neo4j: " + e.getMessage());
+    }
 }
+
 
 public void deleteAmenity(int idAmenity) {
-    MongoCollection<Document> collection = mongoDB.getCollection("amenities");
-    collection.deleteOne(Filters.eq("id_amenities", idAmenity));
+    // MongoDB
+    try {
+        MongoCollection<Document> collection = mongoDB.getCollection("amenities");
+        collection.deleteOne(Filters.eq("idAmenity", idAmenity));
+        System.out.println("Amenity eliminado en MongoDB con idAmenity: " + idAmenity);
+    } catch (Exception e) {
+        System.err.println("Error al eliminar amenity en MongoDB: " + e.getMessage());
+    }
+
+    // Neo4j
+    try (Session session = neo4jDB.session()) {
+        session.writeTransaction(tx -> {
+            tx.run("MATCH (a:amenity {idAmenity: $idAmenity}) DELETE a",
+                    Map.of("idAmenity", idAmenity));
+            return null;
+        });
+        System.out.println("Amenity eliminado en Neo4j con idAmenity: " + idAmenity);
+    } catch (Exception e) {
+        System.err.println("Error al eliminar amenity en Neo4j: " + e.getMessage());
+    }
 }
 
+
+//------------------------------------------------------------------------------------------------------------------------------------
+    // CRUD para la entidad Habitacion neo4jDB mongoDB
+//------------------------------------------------------------------------------------------------------------------------------------
+    // CRUD para la entidad Huesped
+
+     // Create Huesped
+    public void createHuesped(Huesped huesped) {
+        try {
+            // MongoDB: Insertar huesped
+            MongoCollection<Document> collection = mongoDB.getCollection("huespedes");
+            Document doc = new Document("_id", huesped.getIdHuesped())
+                    .append("nombre", huesped.getNombre())
+                    .append("apellido", huesped.getApellido())
+                    .append("telefono", huesped.getTelefono())
+                    .append("email", huesped.getEmail())
+                    .append("direccion", huesped.getDireccion());
+            collection.insertOne(doc);
+            System.out.println("Huesped insertado en MongoDB.");
+
+            // Neo4j: Crear nodo de huesped
+            try (Session session = neo4jDB.session()) {
+                try (Transaction tx = session.beginTransaction()) {
+                tx.run("CREATE (h:Huesped {id: $id, nombre: $nombre, apellido: $apellido, telefono: $telefono, email: $email, direccion: $direccion})",
+                        Map.of(
+                                "id", huesped.getIdHuesped().toHexString(),
+                                "nombre", huesped.getNombre(),
+                                "apellido", huesped.getApellido(),
+                                "telefono", huesped.getTelefono(),
+                                "email", huesped.getEmail(),
+                                "direccion", huesped.getDireccion().toString()
+                        ));
+                tx.commit();
+                System.out.println("Huesped insertado en Neo4j.");
+                }
+            }
+        } catch (Exception e) {
+            System.err.println("Error al crear Huesped: " + e.getMessage());
+        }
+    }
+
+    // Read Huesped
+    public Huesped readHuesped(ObjectId idHuesped) {
+        Huesped huesped = null;
+        try {
+            // MongoDB: Buscar huesped
+            MongoCollection<Document> collection = mongoDB.getCollection("huespedes");
+            Document doc = collection.find(new Document("_id", idHuesped)).first();
+            if (doc != null) {
+                huesped = new Huesped(
+                        doc.getObjectId("_id"),
+                        doc.getString("nombre"),
+                        doc.getString("apellido"),
+                        doc.getString("telefono"),
+                        doc.getString("email"),
+                        (Map<String, String>) doc.get("direccion")
+                );
+            }
+        } catch (Exception e) {
+            System.err.println("Error al leer Huesped: " + e.getMessage());
+        }
+        return huesped;
+    }
+
+    // Update Huesped
+    public void updateHuesped(Huesped huesped) {
+        try {
+            // MongoDB: Actualizar huesped
+            MongoCollection<Document> collection = mongoDB.getCollection("huespedes");
+            Document updateDoc = new Document("nombre", huesped.getNombre())
+                    .append("apellido", huesped.getApellido())
+                    .append("telefono", huesped.getTelefono())
+                    .append("email", huesped.getEmail())
+                    .append("direccion", huesped.getDireccion());
+            collection.updateOne(new Document("_id", huesped.getIdHuesped()), new Document("$set", updateDoc));
+            System.out.println("Huesped actualizado en MongoDB.");
+
+            // Neo4j: Actualizar nodo de huesped
+            try (Session session = neo4jDB.session()) {
+                try (Transaction tx = session.beginTransaction()) {
+                tx.run("MATCH (h:Huesped {id: $id}) SET h.nombre = $nombre, h.apellido = $apellido, h.telefono = $telefono, h.email = $email, h.direccion = $direccion",
+                        Map.of(
+                                "id", huesped.getIdHuesped().toHexString(),
+                                "nombre", huesped.getNombre(),
+                                "apellido", huesped.getApellido(),
+                                "telefono", huesped.getTelefono(),
+                                "email", huesped.getEmail(),
+                                "direccion", huesped.getDireccion().toString()
+                        ));
+                tx.commit();
+                System.out.println("Huesped actualizado en Neo4j.");
+            }
+            }
+        } catch (Exception e) {
+            System.err.println("Error al actualizar Huesped: " + e.getMessage());
+        }
+    }
+
+    // Delete Huesped
+    public void deleteHuesped(ObjectId idHuesped) {
+        try {
+            // MongoDB: Eliminar huesped
+            MongoCollection<Document> collection = mongoDB.getCollection("huespedes");
+            collection.deleteOne(new Document("_id", idHuesped));
+            System.out.println("Huesped eliminado de MongoDB.");
+
+            // Neo4j: Eliminar nodo de huesped
+            try (Session session = neo4jDB.session()) {
+                try (Transaction tx = session.beginTransaction()) {
+                tx.run("MATCH (h:Huesped {id: $id}) DELETE h",
+                        Map.of("id", idHuesped.toHexString()));
+                tx.commit();
+                System.out.println("Huesped eliminado de Neo4j.");
+                }   
+            }
+        } catch (Exception e) {
+            System.err.println("Error al eliminar Huesped: " + e.getMessage());
+        }
+    }
+
+//----------------------------------------------------------------------------------------------------
+
 // CRUD para la entidad Zona
+
 public void createZona(Zona zona) {
     MongoCollection<Document> collection = mongoDB.getCollection("zonas");
     Document document = new Document("id_zona", zona.getIdZona())
@@ -484,12 +578,44 @@ public void deleteZona(int idZona) {
     collection.deleteOne(Filters.eq("id_zona", idZona));
 }
 
+
+
+//--------------------------------------------------------------------------------------------
+//Persistencia
     public int getUltimoIdHotel() {
         MongoCollection<Document> collection = mongoDB.getCollection("contadores");
         Document resultado = collection.find(new Document("_id", "id_hotel"))
                                 .projection(new Document("_id", 0).append("seq", 1))
                                 .first();
         return resultado.getInteger("seq");
+    }
+
+    public void aumentarUltimoIdHotel() {
+        mongoDB.getCollection("contadores").updateOne(new Document("_id", "id_hotel"), new Document("$inc", new Document("seq", 1)));
+    }
+
+    public int getUltimoIdAmenity() {
+        MongoCollection<Document> collection = mongoDB.getCollection("contadores");
+        Document resultado = collection.find(new Document("_id", "id_amenity"))
+                                    .projection(new Document("_id", 0).append("seq", 1))
+                                    .first();
+        return resultado.getInteger("seq");
+    }
+    
+    public int getUltimoIdHuesped() {
+        MongoCollection<Document> collection = mongoDB.getCollection("contadores");
+        Document resultado = collection.find(new Document("_id", "id_huesped"))
+                                    .projection(new Document("_id", 0).append("seq", 1))
+                                    .first();
+        return resultado.getInteger("seq");
+    }
+    
+    public void aumentarUltimoIdHuesped() {
+        mongoDB.getCollection("contadores").updateOne(new Document("_id", "id_huesped"), new Document("$inc", new Document("seq", 1)));
+    }
+
+    public void aumentarUltimoIdAmenity() {
+        mongoDB.getCollection("contadores").updateOne(new Document("_id", "id_amenity"), new Document("$inc", new Document("seq", 1)));
     }
 
     public int getUltimoIdPuntoDeInteres() {
@@ -500,9 +626,7 @@ public void deleteZona(int idZona) {
         return resultado.getInteger("seq");
     }
 
-    public void aumentarUltimoIdHotel() {
-        mongoDB.getCollection("contadores").updateOne(new Document("_id", "id_hotel"), new Document("$inc", new Document("seq", 1)));
-    }
+    
 
     public void aumentarUltimoIdPuntoDeInteres() {
         mongoDB.getCollection("contadores").updateOne(new Document("_id", "id_poi"), new Document("$inc", new Document("seq", 1)));
