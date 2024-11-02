@@ -3,6 +3,7 @@ package org.example.PRUEBA;
 import org.example.conexionmongo.MongoDBConnection;
 import org.example.conexionneo4j.Neo4jDBConnection;
 import org.example.controlador.DatabaseQueryController;
+import org.example.entidades.Amenity;
 import org.example.entidades.Hotel;
 import org.example.entidades.PuntoDeInteres;
 
@@ -12,7 +13,7 @@ public class DBQueryControllerTest {
 
     public static void main(String[] args) {
         DatabaseQueryController controller = new DatabaseQueryController();
-
+        /*
         int idHotel = 28;
         List<PuntoDeInteres> puntosDeInteres = controller.getPOIsByIDHotel(idHotel);
 
@@ -45,6 +46,23 @@ public class DBQueryControllerTest {
             }
         } else {
             System.out.println("No se encontraron hoteles para el punto de interes con ID: " + idPoi);
+        }*/
+
+        // Número de habitación a consultar
+        int nroHabitacion = 2;
+
+        // Obtener y mostrar los amenities de la habitación
+        List<Amenity> amenities = controller.getAmenitiesByHabitacion(nroHabitacion);
+        if (amenities != null && !amenities.isEmpty()) {
+            System.out.println("Amenities para la habitación " + nroHabitacion + ":");
+            for (Amenity amenity : amenities) {
+                System.out.println("- ID: " + amenity.getIdAmenity());
+                System.out.println("  Nombre: " + amenity.getNombre());
+                System.out.println("  Descripción: " + amenity.getDescripcion());
+                System.out.println("-------------");
+            }
+        } else {
+            System.out.println("No se encontraron amenities para la habitación " + nroHabitacion);
         }
 
         MongoDBConnection.closeConnection();

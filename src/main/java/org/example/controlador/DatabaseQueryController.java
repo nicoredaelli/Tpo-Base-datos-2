@@ -3,6 +3,7 @@ package org.example.controlador;
 import com.mongodb.client.MongoDatabase;
 import org.example.conexionmongo.MongoDBConnection;
 import org.example.conexionneo4j.Neo4jDBConnection;
+import org.example.entidades.Amenity;
 import org.example.entidades.Hotel;
 import org.example.entidades.PuntoDeInteres;
 import org.neo4j.driver.Driver;
@@ -105,6 +106,45 @@ public class DatabaseQueryController {
             System.err.println("Error al obtener hoteles por ID de punto de interés: " + e.getMessage());
         }
         return hoteles;
+    }
+
+    public List<Amenity> getAmenitiesByHabitacion(int nroHabitacion) {
+        List<Amenity> amenities = new ArrayList<>();
+
+        try (Session session = neo4jDB.session()) {
+            // Paso 1: Obtener los IDs de los amenities relacionados con la habitación en Neo4j
+            Result result = session.run(
+                        "MATCH (h:habitacion{nro_habitacion:$nroHabitacion})-[:TIENE_AMENITY]->(a:amenity) " +
+                                "RETURN a.id_amenity AS id_amenity",
+                    Map.of("nroHabitacion", nroHabitacion)
+            );
+
+            // Recoger todos los ids de amenities en una lista
+            List<Integer> amenityIds = new ArrayList<>();
+            while (result.hasNext()) {
+                Record record = result.next();
+                amenityIds.add(record.get("id_amenity").asInt());
+            }
+
+            // Paso 2: Buscar los detalles de cada amenity en MongoDB usando los IDs
+            MongoCollection<Document> collection = mongoDB.getCollection("amenities");
+            for (Integer amenityId : amenityIds) {
+                Document doc = collection.find(Filters.eq("id_amenity", amenityId)).first();
+                if (doc != null) {
+                    Amenity amenity = new Amenity(
+                            doc.getObjectId("_id"),
+                            doc.getInteger("id_amenity"),
+                            doc.getString("nombre"),
+                            doc.getString("descripcion")
+                    );
+                    amenities.add(amenity);
+                }
+            }
+        } catch (Exception e) {
+            System.err.println("Error al obtener amenities por número de habitación: " + e.getMessage());
+        }
+
+        return amenities;
     }
 }
 
