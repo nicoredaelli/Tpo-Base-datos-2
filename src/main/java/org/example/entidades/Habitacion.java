@@ -6,7 +6,7 @@ import org.bson.types.ObjectId;
 
 public class Habitacion {
     private int nroHabitacion;
-    private ObjectId idHotel;
+    private int idHotel;
     private String tipoHabitacion;
     private List<Integer> amenities;
 
@@ -18,11 +18,11 @@ public class Habitacion {
         this.nroHabitacion = nroHabitacion;
     }
 
-    public ObjectId getIdHotel() {
+    public int getIdHotel() {
         return idHotel;
     }
 
-    public void setIdHotel(ObjectId idHotel) {
+    public void setIdHotel(int idHotel) {
         this.idHotel = idHotel;
     }
 
@@ -42,8 +42,18 @@ public class Habitacion {
         this.amenities = amenities;
     }
 
+    @Override
+    public String toString() {
+        return "Habitacion{" +
+                "nroHabitacion=" + nroHabitacion +
+                ", idHotel=" + idHotel +
+                ", tipoHabitacion='" + tipoHabitacion + '\'' +
+                ", amenities=" + amenities +
+                '}';
+    }
+
     // Constructor
-    public Habitacion(int nroHabitacion, ObjectId idHotel, String tipoHabitacion, List<Integer> amenities) {
+    public Habitacion(int nroHabitacion, int idHotel, String tipoHabitacion, List<Integer> amenities) {
         this.nroHabitacion = nroHabitacion;
         this.idHotel = idHotel;
         this.tipoHabitacion = tipoHabitacion;

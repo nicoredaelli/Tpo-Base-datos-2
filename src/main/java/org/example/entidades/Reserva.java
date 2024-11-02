@@ -3,15 +3,17 @@ package org.example.entidades;
 
 import org.bson.types.ObjectId;
 
+import java.util.Date;
+
 public class Reserva {
      private int codReserva;
-    private String checkin;
-    private String checkout;
-    private String estadoReserva;
+    private Date checkin;
+    private Date checkout;
+    private EstadoReserva estadoReserva;
     private double tarifa;
-    private ObjectId idHotel;
+    private int idHotel;
     private int idHabitacion;
-    private ObjectId idHuesped;
+    private int idHuesped;
 
     public int getCodReserva() {
         return codReserva;
@@ -21,27 +23,27 @@ public class Reserva {
         this.codReserva = codReserva;
     }
 
-    public String getCheckin() {
+    public Date getCheckin() {
         return checkin;
     }
 
-    public void setCheckin(String checkin) {
+    public void setCheckin(Date checkin) {
         this.checkin = checkin;
     }
 
-    public String getCheckout() {
+    public Date getCheckout() {
         return checkout;
     }
 
-    public void setCheckout(String checkout) {
+    public void setCheckout(Date checkout) {
         this.checkout = checkout;
     }
 
-    public String getEstadoReserva() {
+    public EstadoReserva getEstadoReserva() {
         return estadoReserva;
     }
 
-    public void setEstadoReserva(String estadoReserva) {
+    public void setEstadoReserva(EstadoReserva estadoReserva) {
         this.estadoReserva = estadoReserva;
     }
 
@@ -53,11 +55,11 @@ public class Reserva {
         this.tarifa = tarifa;
     }
 
-    public ObjectId getIdHotel() {
+    public int getIdHotel() {
         return idHotel;
     }
 
-    public void setIdHotel(ObjectId idHotel) {
+    public void setIdHotel(int idHotel) {
         this.idHotel = idHotel;
     }
 
@@ -69,16 +71,30 @@ public class Reserva {
         this.idHabitacion = idHabitacion;
     }
 
-    public ObjectId getIdHuesped() {
+    public int getIdHuesped() {
         return idHuesped;
     }
 
-    public void setIdHuesped(ObjectId idHuesped) {
+    public void setIdHuesped(int idHuesped) {
         this.idHuesped = idHuesped;
     }
 
+    @Override
+    public String toString() {
+        return "Reserva{" +
+                "codReserva=" + codReserva +
+                ", checkin='" + checkin + '\'' +
+                ", checkout='" + checkout + '\'' +
+                ", estadoReserva=" + estadoReserva +
+                ", tarifa=" + tarifa +
+                ", idHotel=" + idHotel +
+                ", idHabitacion=" + idHabitacion +
+                ", idHuesped=" + idHuesped +
+                '}';
+    }
+
     // Constructor
-    public Reserva(int codReserva, String checkin, String checkout, String estadoReserva, double tarifa, ObjectId idHotel, int idHabitacion, ObjectId idHuesped) {
+    public Reserva(int codReserva, Date checkin, Date checkout, EstadoReserva estadoReserva, double tarifa, int idHotel, int idHabitacion, int idHuesped) {
         this.codReserva = codReserva;
         this.checkin = checkin;
         this.checkout = checkout;

@@ -15,10 +15,12 @@ public class HabitacionCrudTest {
         // Crear una lista de IDs de amenities (esto es un ejemplo de amenities disponibles)
         List<Integer> amenities = Arrays.asList(1, 2, 3);
 
+        int nroHabitacion = crudController.getUltimoNroHabitacion() + 1;
+
         // Crear una nueva habitación con datos de prueba
         Habitacion nuevaHabitacion = new Habitacion(
-                101,                            // Número de la habitación
-                new ObjectId(),                 // ID del hotel (generar un nuevo ObjectId)
+                nroHabitacion,                  // Número de la habitación
+                1,                 // ID del hotel (generar un nuevo ObjectId)
                 "Deluxe",                       // Tipo de habitación
                 amenities                       // Lista de amenities
         );
@@ -36,13 +38,15 @@ public class HabitacionCrudTest {
             System.out.println("No se encontró la habitación en MongoDB.");
         }
 
+
+
         System.out.println("Ahora, se va a actualizar la habitación con otros datos ...");
 
         // Actualizar la habitación con nuevos datos
-        nuevaHabitacion.setTipoHabitacion("Suite");
+        nuevaHabitacion.setTipoHabitacion("Super Suite");
         nuevaHabitacion.setAmenities(Arrays.asList(4, 5, 6));
 
-        // Llamada al método para actualizar los datos de la habitación
+        // Llamada al metodo para actualizar los datos de la habitación
         crudController.updateHabitacion(nuevaHabitacion);
         System.out.println("Habitación actualizada con éxito.");
 
@@ -53,6 +57,7 @@ public class HabitacionCrudTest {
         } else {
             System.out.println("No se encontró la habitación actualizada en MongoDB.");
         }
+
 
         // Eliminar la habitación de MongoDB
         crudController.deleteHabitacion(nuevaHabitacion.getNroHabitacion());

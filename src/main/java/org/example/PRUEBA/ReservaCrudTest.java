@@ -2,25 +2,29 @@ package org.example.PRUEBA;
 
 import org.bson.types.ObjectId;
 import org.example.controlador.CRUDController;
+import org.example.entidades.EstadoReserva;
 import org.example.entidades.Reserva;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+
 public class ReservaCrudTest {
-    public static void main(String[] args) {
+    public static void main(String[] args) throws ParseException {
         // Inicializar el controlador CRUD
         CRUDController crudController = new CRUDController();
 
-        int codReserva = crudController.getUltimoIdReserva() + 1; // Trae el ultimo ID existente de las reservas (coleccion contadores) y lo incrementa
+        int codReserva = crudController.getUltimoCodReserva() + 1; // Trae el ultimo ID existente de las reservas (coleccion contadores) y lo incrementa
 
         // Crear una nueva reserva con datos de prueba
         Reserva nuevaReserva = new Reserva(
                 codReserva,                     // Código de la reserva
-                "2023-10-01",                   // Fecha de check-in
-                "2023-10-10",                   // Fecha de check-out
-                "confirmada",                   // Estado de la reserva
+                new SimpleDateFormat("yyyy-MM-dd").parse("2023-10-01"),                   // Fecha de check-in
+                new SimpleDateFormat("yyyy-MM-dd").parse("2023-10-10"),                   // Fecha de check-out
+                EstadoReserva.CONFIRMADO,                   // Estado de la reserva
                 1500.0,                         // Tarifa
-                new ObjectId(),                 // ID del hotel (generar un nuevo ObjectId)
+                1,                 // ID del hotel (generar un nuevo ObjectId)
                 101,                            // ID de la habitación
-                new ObjectId()                  // ID del huésped (generar un nuevo ObjectId)
+                1                  // ID del huésped (generar un nuevo ObjectId)
         );
 
         // Intentar crear la reserva en MongoDB y Neo4j
@@ -39,12 +43,12 @@ public class ReservaCrudTest {
         System.out.println("Ahora, se va a actualizar la reserva con otros datos ...");
 
         // Actualizar la reserva con nuevos datos
-        nuevaReserva.setCheckin("2023-10-05");
-        nuevaReserva.setCheckout("2023-10-15");
-        nuevaReserva.setEstadoReserva("modificada");
-        nuevaReserva.setTarifa(1800.0);
+        nuevaReserva.setCheckin(new SimpleDateFormat("yyyy-MM-dd").parse("2023-10-05"));
+        nuevaReserva.setCheckout(new SimpleDateFormat("yyyy-MM-dd").parse("2023-10-15"));
+        nuevaReserva.setEstadoReserva(EstadoReserva.CANCELADO);
+        nuevaReserva.setTarifa(1900.0);
 
-        // Llamada al método para actualizar los datos de la reserva
+        // Llamada al metodo para actualizar los datos de la reserva
         crudController.updateReserva(nuevaReserva);
         System.out.println("Reserva actualizada con éxito.");
 

@@ -451,6 +451,7 @@ public void createHabitacion(Habitacion habitacion) {
                 .append("tipo_habitacion", habitacion.getTipoHabitacion())
                 .append("amenities", habitacion.getAmenities());
         collection.insertOne(document);
+        this.aumentarUltimoNroHabitacion();
         System.out.println("Habitación insertada en MongoDB: " + habitacion.getNroHabitacion());
     } catch (Exception e) {
         System.err.println("Error al insertar habitación en MongoDB: " + e.getMessage());
@@ -470,7 +471,7 @@ public void createHabitacion(Habitacion habitacion) {
                     Map.of(
                             "nroHabitacion", habitacion.getNroHabitacion(),
                             "tipoHabitacion", habitacion.getTipoHabitacion(),
-                            "idHotel", habitacion.getIdHotel().toString(),
+                            "idHotel", habitacion.getIdHotel(),
                             "amenities", habitacion.getAmenities()
                     ));
             return null;
@@ -486,10 +487,15 @@ public Habitacion readHabitacion(int nroHabitacion) {
     try {
         MongoCollection<Document> collection = mongoDB.getCollection("habitaciones");
         Document doc = collection.find(Filters.eq("nro_habitacion", nroHabitacion)).first();
+
+        List<Integer> amenities = doc.getList("amenities", Integer.class);
+
+        amenities.forEach(a -> this.readAmenity(a));
+
         if (doc != null) {
             return new Habitacion(
                     doc.getInteger("nro_habitacion"),
-                    new ObjectId(doc.getString("id_hotel")),
+                    doc.getInteger("id_hotel"),
                     doc.getString("tipo_habitacion"),
                     doc.getList("amenities", Integer.class)
             );
@@ -536,7 +542,7 @@ public void updateHabitacion(Habitacion habitacion) {
                     Map.of(
                             "nroHabitacion", habitacion.getNroHabitacion(),
                             "tipoHabitacion", habitacion.getTipoHabitacion(),
-                            "idHotel", habitacion.getIdHotel().toString(),
+                            "idHotel", habitacion.getIdHotel(),
                             "amenities", habitacion.getAmenities()
                     ));
             return null;
@@ -586,31 +592,10 @@ public void createReserva(Reserva reserva) {
                 .append("id_habitacion", reserva.getIdHabitacion())
                 .append("id_huesped", reserva.getIdHuesped());
         collection.insertOne(document);
-        this.aumentarUltimoIdReserva();
+        this.aumentarUltimoCodReserva();
         System.out.println("Reserva insertada en MongoDB: " + reserva.getCodReserva());
     } catch (Exception e) {
         System.err.println("Error al insertar reserva en MongoDB: " + e.getMessage());
-    }
-
-    // Neo4j
-    try (Session session = neo4jDB.session()) {
-        session.writeTransaction(tx -> {
-            tx.run("MERGE (r:reserva {cod_reserva: $codReserva, checkin: $checkin, checkout: $checkout, estado_reserva: $estadoReserva, tarifa: $tarifa, id_hotel: $idHotel, id_habitacion: $idHabitacion, id_huesped: $idHuesped})",
-                    Map.of(
-                            "codReserva", reserva.getCodReserva(),
-                            "checkin", reserva.getCheckin(),
-                            "checkout", reserva.getCheckout(),
-                            "estadoReserva", reserva.getEstadoReserva(),
-                            "tarifa", reserva.getTarifa(),
-                            "idHotel", reserva.getIdHotel().toString(),
-                            "idHabitacion", reserva.getIdHabitacion(),
-                            "idHuesped", reserva.getIdHuesped().toString()
-                    ));
-            return null;
-        });
-        System.out.println("Reserva insertada en Neo4j: " + reserva.getCodReserva());
-    } catch (Exception e) {
-        System.err.println("Error al insertar reserva en Neo4j: " + e.getMessage());
     }
 }
 
@@ -622,13 +607,13 @@ public Reserva readReserva(int codReserva) {
         if (doc != null) {
             return new Reserva(
                     doc.getInteger("cod_reserva"),
-                    doc.getString("checkin"),
-                    doc.getString("checkout"),
-                    doc.getString("estado_reserva"),
+                    doc.getDate("checkin"),
+                    doc.getDate("checkout"),
+                    EstadoReserva.valueOf(doc.getString("estado_reserva")),
                     doc.getDouble("tarifa"),
-                    new ObjectId(doc.getString("id_hotel")),
+                    doc.getInteger("id_hotel"),
                     doc.getInteger("id_habitacion"),
-                    new ObjectId(doc.getString("id_huesped"))
+                    doc.getInteger("id_huesped")
             );
         } else {
             System.out.println("Reserva no encontrada en MongoDB con codReserva: " + codReserva);
@@ -659,28 +644,6 @@ public void updateReserva(Reserva reserva) {
     } catch (Exception e) {
         System.err.println("Error al actualizar reserva en MongoDB: " + e.getMessage());
     }
-
-    // Neo4j
-    try (Session session = neo4jDB.session()) {
-        session.writeTransaction(tx -> {
-            tx.run("MATCH (r:reserva {cod_reserva: $codReserva}) " +
-                            "SET r.checkin = $checkin, r.checkout = $checkout, r.estado_reserva = $estadoReserva, r.tarifa = $tarifa, r.id_hotel = $idHotel, r.id_habitacion = $idHabitacion, r.id_huesped = $idHuesped",
-                    Map.of(
-                            "codReserva", reserva.getCodReserva(),
-                            "checkin", reserva.getCheckin(),
-                            "checkout", reserva.getCheckout(),
-                            "estadoReserva", reserva.getEstadoReserva(),
-                            "tarifa", reserva.getTarifa(),
-                            "idHotel", reserva.getIdHotel().toString(),
-                            "idHabitacion", reserva.getIdHabitacion(),
-                            "idHuesped", reserva.getIdHuesped().toString()
-                    ));
-            return null;
-        });
-        System.out.println("Reserva actualizada en Neo4j: " + reserva.getCodReserva());
-    } catch (Exception e) {
-        System.err.println("Error al actualizar reserva en Neo4j: " + e.getMessage());
-    }
 }
 
 public void deleteReserva(int codReserva) {
@@ -691,18 +654,6 @@ public void deleteReserva(int codReserva) {
         System.out.println("Reserva eliminada en MongoDB con codReserva: " + codReserva);
     } catch (Exception e) {
         System.err.println("Error al eliminar reserva en MongoDB: " + e.getMessage());
-    }
-
-    // Neo4j
-    try (Session session = neo4jDB.session()) {
-        session.writeTransaction(tx -> {
-            tx.run("MATCH (r:reserva {cod_reserva: $codReserva}) DELETE r",
-                    Map.of("codReserva", codReserva));
-            return null;
-        });
-        System.out.println("Reserva eliminada en Neo4j con codReserva: " + codReserva);
-    } catch (Exception e) {
-        System.err.println("Error al eliminar reserva en Neo4j: " + e.getMessage());
     }
 }
 
@@ -928,16 +879,29 @@ public void deleteZona(int idZona) {
     }
 
 
-    public int getUltimoIdReserva() {
+    public int getUltimoCodReserva() {
         MongoCollection<Document> collection = mongoDB.getCollection("contadores");
-        Document resultado = collection.find(new Document("_id", "id_reserva"))
+        Document resultado = collection.find(new Document("_id", "cod_reserva"))
                                     .projection(new Document("_id", 0).append("seq", 1))
                                     .first();
         return resultado.getInteger("seq");
     }
     
-    public void aumentarUltimoIdReserva() {
-        mongoDB.getCollection("contadores").updateOne(new Document("_id", "id_reserva"), new Document("$inc", new Document("seq", 1)));
+    public void aumentarUltimoCodReserva() {
+        mongoDB.getCollection("contadores").updateOne(new Document("_id", "cod_reserva"), new Document("$inc", new Document("seq", 1)));
     }
+
+    public int getUltimoNroHabitacion() {
+        MongoCollection<Document> collection = mongoDB.getCollection("contadores");
+        Document resultado = collection.find(new Document("_id", "nro_habitacion"))
+                .projection(new Document("_id", 0).append("seq", 1))
+                .first();
+        return resultado.getInteger("seq");
+    }
+
+    public void aumentarUltimoNroHabitacion() {
+        mongoDB.getCollection("contadores").updateOne(new Document("_id", "nro_habitacion"), new Document("$inc", new Document("seq", 1)));
+    }
+
 
 }
