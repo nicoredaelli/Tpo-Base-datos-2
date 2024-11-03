@@ -16,6 +16,7 @@ import org.neo4j.driver.Transaction;
 import org.neo4j.driver.Values;
 
 import java.time.ZoneId;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -24,10 +25,14 @@ public class CRUDController {
 
     private final MongoDatabase mongoDB;
     private final Driver neo4jDB;
-
+    
+    
+    
     public CRUDController() {
         this.mongoDB = MongoDBConnection.getDatabase();
         this.neo4jDB = Neo4jDBConnection.getConnection();
+
+        
     }
 
     // CRUD para la entidad Hotel
@@ -576,7 +581,41 @@ public void deleteHabitacion(int nroHabitacion) {
     }
 }
 
-//------------------------------------------------------------------------------------------------------------------------------------
+
+    public List<Hotel> getHotelesDisponibles() {
+        List<Hotel> hoteles = new ArrayList<>();
+
+        try {
+            // Conectar a la base de datos y obtener la colección de hoteles
+            MongoCollection<Document> collection = mongoDB.getCollection("hoteles");
+
+            // Obtener todos los documentos y convertirlos a objetos Hotel
+            for (Document doc : collection.find()) {
+                Hotel hotel = new Hotel(
+                        doc.getObjectId("_id"),
+                        doc.getInteger("id_hotel"),
+                        doc.getString("nombre"),
+                        doc.getString("telefono"),
+                        doc.getString("email"),
+                        (Map<String, String>) doc.get("direccion"),
+                        (List<Integer>) doc.get("habitaciones"),
+                        doc.getInteger("zona")
+                );
+                hoteles.add(hotel);
+            }
+
+        } catch (Exception e) {
+            System.err.println("Error al obtener los hoteles: " + e.getMessage());
+        }
+
+        return hoteles;
+    }
+
+
+
+
+
+    //------------------------------------------------------------------------------------------------------------------------------------
     // CRUD para la entidad Reserva
 public void createReserva(Reserva reserva) {
     // MongoDB
@@ -902,6 +941,16 @@ public void deleteZona(int idZona) {
     public void aumentarUltimoNroHabitacion() {
         mongoDB.getCollection("contadores").updateOne(new Document("_id", "nro_habitacion"), new Document("$inc", new Document("seq", 1)));
     }
+
+
+
+
+
+
+
+
+
+
 
 
 }
