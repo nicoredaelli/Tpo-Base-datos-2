@@ -9,6 +9,18 @@ public class Huesped {
     private int idHuesped;
     private String nombre;
     private String apellido;
+    public void setDireccion(Map<String, String> direccion) {
+        this.direccion = direccion;
+    }
+
+    public void setNombre(String nombre) {
+        this.nombre = nombre;
+    }
+
+    public void setApellido(String apellido) {
+        this.apellido = apellido;
+    }
+
     private String telefono;
     private String email;
     private Map<String, String> direccion;

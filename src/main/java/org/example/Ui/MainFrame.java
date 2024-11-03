@@ -61,8 +61,21 @@ public class MainFrame extends JFrame {
         mainPanel.add(new GestiónHR(this), "GestiónHR"); // Panel para la gestión
         
         mainPanel.add(new ReservaCRUDPanel(this), "ReservaCRUDPanel");
+        mainPanel.add(new CreateReservaPanel(this), "CreateReservaPanel");
+        mainPanel.add(new ReadReservaPanel(this), "ReadReservaPanel");
+        mainPanel.add(new UpdateReservaPanel(this), "UpdateReservaPanel");
+        mainPanel.add(new DeleteReservaPanel(this), "DeleteReservaPanel");
+
 
         mainPanel.add(new HuespedCRUDPanel(this), "HuespedCRUDPanel");
+        mainPanel.add(new CreateHuespedPanel(this), "CreateHuespedPanel");
+        mainPanel.add(new ReadHuespedPanel(this), "ReadHuespedPanel");
+        mainPanel.add(new UpdateHuespedPanel(this), "UpdateHuespedPanel");
+        mainPanel.add(new DeleteHuespedPanel(this), "DeleteHuespedPanel");
+
+        
+
+
 
         add(mainPanel);
         setTitle("Administrador de Hoteles");
