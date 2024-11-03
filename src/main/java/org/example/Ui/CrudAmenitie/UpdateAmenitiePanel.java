@@ -5,11 +5,11 @@ import org.example.Ui.MainFrame;
 import org.example.controlador.CRUDController;
 import org.example.entidades.Amenity;
 // hay que buscar un getidamenitie para que te traiga toda la info de ese amenitie 
-public class UpdateAmenityPanel extends JPanel {
+public class UpdateAmenitiePanel extends JPanel {
     private JTextField idField, nameField, descriptionField;
     private CRUDController amenityCRUD;
 
-    public UpdateAmenityPanel(MainFrame mainFrame) {
+    public UpdateAmenitiePanel (MainFrame mainFrame) {
         amenityCRUD = new CRUDController();
 
         setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));

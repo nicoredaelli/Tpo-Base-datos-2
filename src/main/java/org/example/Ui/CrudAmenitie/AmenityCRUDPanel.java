@@ -16,7 +16,7 @@ public class AmenityCRUDPanel extends JPanel {
 
         
         JButton btnRead = new JButton("Leer");
-        btnRead.addActionListener(e -> mainFrame.showPanel("ReedAmenitiePanel")); // Cambiar al panel de eliminación
+        btnRead.addActionListener(e -> mainFrame.showPanel("ReadAmenitiePanel")); // Cambiar al panel de eliminación
 
 
         JButton btnDelete = new JButton("Eliminar");

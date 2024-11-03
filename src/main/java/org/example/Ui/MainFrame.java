@@ -6,6 +6,7 @@ import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
 
+import org.example.Ui.CrudAmenitie.*;
 import org.example.Ui.CrudHabitaciones.CreateRoomPanel;
 import org.example.Ui.CrudHabitaciones.DeleteRoomPanel;
 import org.example.Ui.CrudHabitaciones.ReedRoomPanel;
@@ -39,6 +40,13 @@ public class MainFrame extends JFrame {
         mainPanel.add(new ReedRoomPanel(this), "ReedRoomPanel");
         mainPanel.add(new DeleteRoomPanel(this), "DeleteRoomPanel");
         mainPanel.add(new UpdateRoomPanel(this), "UpdateRoomPanel");
+
+        mainPanel.add(new AmenityCRUDPanel(this), "AmenityCRUDPanel");
+        mainPanel.add(new CreateAmenitiePanel(this), "CreateAmenitiePanel");
+        mainPanel.add(new UpdateAmenitiePanel(this), "UpdateAmenitiePanel");
+        mainPanel.add(new DeleteAmenitiePanel(this), "DeleteAmenitiePanel");
+        mainPanel.add(new ReadAmenitiePanel(this), "ReadAmenitiePanel");
+
         add(mainPanel);
         setTitle("Administrador de Hoteles");
         setSize(600, 600);
