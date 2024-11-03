@@ -1,5 +1,4 @@
-package org.example.Ui.CrudHabitaciones;
-
+package org.example.Ui.Metodo1.CrudHabitaciones;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;

@@ -1,26 +1,25 @@
-package org.example.Ui.CrudHotel;
-
+package org.example.Ui.Metodo1.CrudHabitaciones;
 import javax.swing.*;
 
 import org.example.Ui.MainFrame;
 
-public class HotelCRUDPanel extends JPanel {
-    public HotelCRUDPanel(MainFrame mainFrame) {
+public class RoomCRUDPanel extends JPanel {
+    public RoomCRUDPanel(MainFrame mainFrame) {
         setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
 
         JButton btnCreate = new JButton("Crear");
-        btnCreate.addActionListener(e -> mainFrame.showPanel("CreateHotel")); 
+        btnCreate.addActionListener(e -> mainFrame.showPanel("CreateRoomPanel")); 
 
         JButton btnUpdate = new JButton("Modificar");
-        btnUpdate.addActionListener(e -> mainFrame.showPanel("UpdateHotel")); 
+        btnUpdate.addActionListener(e -> mainFrame.showPanel("UpdateRoomPanel")); 
 
         
         JButton btnRead = new JButton("Leer");
-        btnRead.addActionListener(e -> mainFrame.showPanel("ReadHotel")); // Cambiar al panel de eliminación
+        btnRead.addActionListener(e -> mainFrame.showPanel("ReedRoomPanel")); // Cambiar al panel de eliminación
 
 
         JButton btnDelete = new JButton("Eliminar");
-        btnDelete.addActionListener(e -> mainFrame.showPanel("DeleteHotel")); // Cambiar al panel de eliminación
+        btnDelete.addActionListener(e -> mainFrame.showPanel("DeleteRoomPanel")); // Cambiar al panel de eliminación
 
 
 

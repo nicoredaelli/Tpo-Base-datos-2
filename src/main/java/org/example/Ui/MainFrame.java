@@ -6,16 +6,18 @@ import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
 
-import org.example.Ui.CrudAmenitie.*;
-import org.example.Ui.CrudHabitaciones.CreateRoomPanel;
-import org.example.Ui.CrudHabitaciones.DeleteRoomPanel;
-import org.example.Ui.CrudHabitaciones.ReedRoomPanel;
-import org.example.Ui.CrudHabitaciones.RoomCRUDPanel;
-import org.example.Ui.CrudHabitaciones.UpdateRoomPanel;
-import org.example.Ui.CrudHotel.*;
+
+import org.example.Ui.Metodo2.*;
+import org.example.Ui.Metodo2.CrudHuesped.*;
+import org.example.Ui.Metodo2.CrudReserva.*;
+import org.example.Ui.Metodo1.*;
+import org.example.Ui.Metodo1.CrudAmenitie.*;
+import org.example.Ui.Metodo1.CrudHabitaciones.*;
+import org.example.Ui.Metodo1.CrudHotel.*;
+import org.example.Ui.Metodo1.CrudPOI.*;
 
 import java.awt.CardLayout;
-import io.mateu.dtos.*;
+
 
 public class MainFrame extends JFrame {
     private CardLayout cardLayout;
@@ -27,10 +29,12 @@ public class MainFrame extends JFrame {
         
         // Agregar paneles con nombres correctos
         mainPanel.add(new MenuPanel(this), "Menu");
+
+//---------------------------------------EJERCICIO 1 ---------------------------------------------------------------------------------------------------------------------------------------
         mainPanel.add(new GestiónHHAP(this), "GestiónHHAP"); // Panel para la gestión
 
         mainPanel.add(new HotelCRUDPanel(this), "HotelCRUDPanel");
-        mainPanel.add(new CreateHotelPanel(this), "CreateHotel"); // Panel para crear hotel
+        mainPanel.add(new CreateHotelPanel(this), "CreateHotel"); 
         mainPanel.add(new UpdateHotelPanel(this), "UpdateHotel");
         mainPanel.add(new DeleteHotelPanel(this), "DeleteHotel");
         mainPanel.add(new ReadHotelPanel(this), "ReadHotel");
@@ -46,6 +50,19 @@ public class MainFrame extends JFrame {
         mainPanel.add(new UpdateAmenitiePanel(this), "UpdateAmenitiePanel");
         mainPanel.add(new DeleteAmenitiePanel(this), "DeleteAmenitiePanel");
         mainPanel.add(new ReadAmenitiePanel(this), "ReadAmenitiePanel");
+
+        mainPanel.add(new POICRUDPanel(this), "POICRUDPanel");
+        mainPanel.add(new CreatePOIPanel(this), "CreatePOIPanel");
+        mainPanel.add(new ReadPOIPanel(this), "ReadPOIPanel");
+        mainPanel.add(new UpdatePOIPanel(this), "UpdatePOIPanel");
+        mainPanel.add(new DeletePOIPanel(this), "DeletePOIPanel");
+
+//---------------------------------------EJERCICIO 2 ---------------------------------------------------------------------------------------------------------------------------------------
+        mainPanel.add(new GestiónHR(this), "GestiónHR"); // Panel para la gestión
+        
+        mainPanel.add(new ReservaCRUDPanel(this), "ReservaCRUDPanel");
+
+        mainPanel.add(new HuespedCRUDPanel(this), "HuespedCRUDPanel");
 
         add(mainPanel);
         setTitle("Administrador de Hoteles");

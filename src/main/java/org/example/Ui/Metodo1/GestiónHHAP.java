@@ -1,8 +1,10 @@
-package org.example.Ui;
+package org.example.Ui.Metodo1;
 
 import javax.swing.BoxLayout;
 import javax.swing.JButton;
 import javax.swing.JPanel;
+
+import org.example.Ui.MainFrame;
 
 public class GestiónHHAP extends JPanel {
     public GestiónHHAP(MainFrame mainFrame) {

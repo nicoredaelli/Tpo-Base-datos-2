@@ -1,4 +1,4 @@
-package org.example.Ui.CrudAmenitie;
+package org.example.Ui.Metodo1.CrudAmenitie;
 
 
 import javax.swing.*;

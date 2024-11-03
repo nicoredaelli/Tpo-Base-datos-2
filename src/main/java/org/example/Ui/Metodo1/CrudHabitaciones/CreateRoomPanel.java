@@ -1,5 +1,4 @@
-package org.example.Ui.CrudHabitaciones;
-
+package org.example.Ui.Metodo1.CrudHabitaciones;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -20,19 +19,11 @@ import org.example.controlador.CRUDController;
 import org.example.entidades.Habitacion;
 import org.example.entidades.Hotel;
 
-import javax.swing.*;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import org.example.Ui.MainFrame;
-import org.example.controlador.CRUDController;
-import org.example.entidades.Habitacion;
-
-public class UpdateRoomPanel extends JPanel {
-    private JTextField roomNumberField, hotelIdField, roomTypeField, amenitiesField;
+public class CreateRoomPanel extends JPanel {
+   private JTextField roomNumberField, hotelIdField, roomTypeField, amenitiesField;
     private CRUDController crudController;
 
-    public UpdateRoomPanel(MainFrame mainFrame) {
+    public CreateRoomPanel(MainFrame mainFrame) {
         crudController = new CRUDController();
 
         setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
@@ -51,43 +42,22 @@ public class UpdateRoomPanel extends JPanel {
         add(new JLabel("Amenities (IDs separados por coma):"));
         add(amenitiesField);
 
-        JButton loadButton = new JButton("Cargar Datos");
-        loadButton.addActionListener(e -> loadRoomData());
-
-        JButton updateButton = new JButton("Actualizar");
-        updateButton.addActionListener(e -> updateRoom());
+        JButton createButton = new JButton("Crear");
+        createButton.addActionListener(e -> createRoom());
 
         JButton backButton = new JButton("Regresar");
-        backButton.addActionListener(e -> mainFrame.showPanel("RoomCRUDPanel"));
+        backButton.addActionListener(e -> mainFrame.showPanel("RoomCRUDPanel")); // Ajustar nombre según el panel anterior
 
-        add(loadButton);
-        add(updateButton);
+        add(createButton);
         add(backButton);
     }
 
-    private void loadRoomData() {
-        try {
-            int roomNumber = Integer.parseInt(roomNumberField.getText());
-            Habitacion habitacion = crudController.readHabitacion(roomNumber);  // Método para buscar la habitación
-
-            if (habitacion != null) {
-                hotelIdField.setText(String.valueOf(habitacion.getIdHotel()));
-                roomTypeField.setText(habitacion.getTipoHabitacion());
-                amenitiesField.setText(habitacion.getAmenities().toString().replaceAll("[\\[\\] ]", ""));
-            } else {
-                JOptionPane.showMessageDialog(this, "Habitación no encontrada.");
-            }
-        } catch (NumberFormatException e) {
-            JOptionPane.showMessageDialog(this, "Ingrese un número de habitación válido.", "Error", JOptionPane.ERROR_MESSAGE);
-        }
-    }
-
-    private void updateRoom() {
+    private void createRoom() {
         try {
             int roomNumber = Integer.parseInt(roomNumberField.getText());
             int hotelId = Integer.parseInt(hotelIdField.getText());
             String roomType = roomTypeField.getText();
-
+            
             // Convertir los IDs de amenities a una lista de enteros
             List<Integer> amenities = new ArrayList<>();
             if (!amenitiesField.getText().trim().isEmpty()) {
@@ -97,11 +67,11 @@ public class UpdateRoomPanel extends JPanel {
                         .toList();
             }
 
-            // Crear la habitación actualizada
-            Habitacion habitacionActualizada = new Habitacion(roomNumber, hotelId, roomType, amenities);
-            crudController.updateHabitacion(habitacionActualizada);
+            // Crear la habitación
+            Habitacion nuevaHabitacion = new Habitacion(roomNumber, hotelId, roomType, amenities);
+            crudController.createHabitacion(nuevaHabitacion);
 
-            JOptionPane.showMessageDialog(this, "Habitación actualizada exitosamente.");
+            JOptionPane.showMessageDialog(this, "Habitación creada exitosamente");
         } catch (NumberFormatException e) {
             JOptionPane.showMessageDialog(this, "Por favor, ingrese valores válidos en los campos numéricos", "Error", JOptionPane.ERROR_MESSAGE);
         }

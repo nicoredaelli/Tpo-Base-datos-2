@@ -1,5 +1,4 @@
-package org.example.Ui.CrudHabitaciones;
-
+package org.example.Ui.Metodo1.CrudHabitaciones;
 import javax.swing.BoxLayout;
 import javax.swing.JButton;
 import javax.swing.JLabel;

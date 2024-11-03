@@ -1,4 +1,4 @@
-package org.example.Ui.CrudHotel;
+package org.example.Ui.Metodo1.CrudHotel;
 
 import java.util.ArrayList;
 import java.util.Arrays;

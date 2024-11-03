@@ -10,6 +10,26 @@ public class PuntoDeInteres {
     private String descripcion;
     private int zona;
 
+    public void setObjectIDPoi(ObjectId objectIDPoi) {
+        this.objectIDPoi = objectIDPoi;
+    }
+
+    public void setIdPoi(int idPoi) {
+        this.idPoi = idPoi;
+    }
+
+    public void setNombre(String nombre) {
+        this.nombre = nombre;
+    }
+
+    public void setDescripcion(String descripcion) {
+        this.descripcion = descripcion;
+    }
+
+    public void setZona(int zona) {
+        this.zona = zona;
+    }
+
     public ObjectId getObjectIDPoi() {
         return objectIDPoi;
     }
