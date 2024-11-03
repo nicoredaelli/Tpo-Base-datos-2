@@ -44,7 +44,7 @@ public class UpdateAmenitiePanel extends JPanel {
     private void loadAmenity() {
         try {
             int idAmenity = Integer.parseInt(idField.getText().trim());
-            Amenity amenity = amenityCRUD.findAmenityById(idAmenity);
+            Amenity amenity = amenityCRUD.readAmenity(idAmenity);
 
             if (amenity != null) {
                 nameField.setText(amenity.getNombre());
