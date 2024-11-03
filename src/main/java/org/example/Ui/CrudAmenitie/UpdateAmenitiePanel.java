@@ -69,7 +69,7 @@ public class UpdateAmenitiePanel extends JPanel {
             }
 
             // Buscar y actualizar el amenity
-            Amenity amenity = amenityCRUD.findAmenityById(idAmenity);
+            Amenity amenity = amenityCRUD.readAmenity(idAmenity);
             if (amenity != null) {
                 amenity.setNombre(name);
                 amenity.setDescripcion(description);

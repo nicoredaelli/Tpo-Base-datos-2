@@ -25,14 +25,13 @@ public class CRUDController {
     private final MongoDatabase mongoDB;
     private final Driver neo4jDB;
     
-    private MongoCollection<Document> amenitiesCollection;
     
     
     public CRUDController() {
         this.mongoDB = MongoDBConnection.getDatabase();
         this.neo4jDB = Neo4jDBConnection.getConnection();
 
-        amenitiesCollection = mongoDB.getCollection("amenities");
+        
     }
 
     // CRUD para la entidad Hotel
@@ -916,24 +915,6 @@ public void deleteZona(int idZona) {
 
 
 
-
-    
-
-    
-    public Amenity findAmenityById(int idAmenity) {
-        Document query = new Document("idAmenity", idAmenity);
-        Document resultado = amenitiesCollection.find(query).first();
-
-        if (resultado != null) {
-            ObjectId objectId = resultado.getObjectId("_id");
-            String nombre = resultado.getString("nombre");
-            String descripcion = resultado.getString("descripcion");
-
-            return new Amenity(objectId, idAmenity, nombre, descripcion);
-        } else {
-            return null; // Si no encuentra el amenity, devuelve null
-        }
-    }
 
 
 
