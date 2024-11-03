@@ -15,7 +15,7 @@ public class RoomCRUDPanel extends JPanel {
 
         
         JButton btnRead = new JButton("Leer");
-        btnRead.addActionListener(e -> mainFrame.showPanel("ReedRoomPanel")); // Cambiar al panel de eliminación
+        btnRead.addActionListener(e -> mainFrame.showPanel("ReadRoomPanel")); // Cambiar al panel de eliminación
 
 
         JButton btnDelete = new JButton("Eliminar");

@@ -41,7 +41,7 @@ public class MainFrame extends JFrame {
 
         mainPanel.add(new RoomCRUDPanel(this), "RoomCRUDPanel");
         mainPanel.add(new CreateRoomPanel(this), "CreateRoomPanel");
-        mainPanel.add(new ReedRoomPanel(this), "ReedRoomPanel");
+        mainPanel.add(new ReadRoomPanel(this), "ReadRoomPanel");
         mainPanel.add(new DeleteRoomPanel(this), "DeleteRoomPanel");
         mainPanel.add(new UpdateRoomPanel(this), "UpdateRoomPanel");
 

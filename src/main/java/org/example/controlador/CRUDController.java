@@ -16,6 +16,7 @@ import org.neo4j.driver.Transaction;
 import org.neo4j.driver.Values;
 
 import java.time.ZoneId;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -579,6 +580,25 @@ public void deleteHabitacion(int nroHabitacion) {
         System.err.println("Error al eliminar habitación en Neo4j: " + e.getMessage());
     }
 }
+
+
+ public List<Hotel> getHotelesDisponibles() {
+        List<Hotel> hoteles = new ArrayList<>();
+
+        try {
+            // Conectar a la base de datos y obtener la colección de hoteles
+            MongoCollection<Hotel> collection = mongoDB.getCollection("hoteles", Hotel.class);
+            hoteles = collection.find().into(new ArrayList<>()); // Obtener todos los hoteles
+            
+        } catch (Exception e) {
+            System.err.println("Error al obtener los hoteles: " + e.getMessage());
+        }
+
+        return hoteles;
+    }
+
+
+
 
 //------------------------------------------------------------------------------------------------------------------------------------
     // CRUD para la entidad Reserva
