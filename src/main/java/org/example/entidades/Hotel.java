@@ -71,4 +71,5 @@ public class Hotel {
         this.habitaciones = habitaciones;
         this.zona = zona;
     }
+    
 }

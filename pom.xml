@@ -35,6 +35,12 @@
         </dependency>
 
 
+    
+      <dependency>
+        <groupId>io.mateu</groupId>
+        <artifactId>dtos</artifactId>
+        <version>3.0-alpha.61</version>
+      </dependency>
     </dependencies>
 
 </project>
