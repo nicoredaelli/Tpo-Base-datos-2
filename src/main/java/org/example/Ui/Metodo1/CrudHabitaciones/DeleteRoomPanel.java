@@ -14,7 +14,7 @@ import org.example.controlador.CRUDController;
 import org.example.entidades.Hotel;
 //lo mismo agregarle el id del hotel 
 public class DeleteRoomPanel extends JPanel {
-    private JTextField roomNumberField;
+    private JTextField idRoomField;
     private JComboBox<String> hotelDropdown;
     private CRUDController crudController;
 
@@ -23,7 +23,7 @@ public class DeleteRoomPanel extends JPanel {
 
         setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
 
-        roomNumberField = new JTextField(10);
+        idRoomField = new JTextField(10);
         hotelDropdown = new JComboBox<>();
 
         // Cargar hoteles en el JComboBox
@@ -32,8 +32,8 @@ public class DeleteRoomPanel extends JPanel {
             hotelDropdown.addItem(hotel.getIdHotel() + " - " + hotel.getNombre()); // Muestra ID y nombre
         }
 
-        add(new JLabel("Número de Habitación:"));
-        add(roomNumberField);
+        add(new JLabel("Id de Habitación:"));
+        add(idRoomField);
         add(new JLabel("Hotel:"));
         add(hotelDropdown);
 
@@ -49,15 +49,15 @@ public class DeleteRoomPanel extends JPanel {
 
     private void deleteRoom() {
         try {
-            int roomNumber = Integer.parseInt(roomNumberField.getText());
+            int idRoom = Integer.parseInt(idRoomField.getText());
             String selectedHotel = (String) hotelDropdown.getSelectedItem();
             int hotelId = Integer.parseInt(selectedHotel.split(" - ")[0]); // Extrae el ID del hotel
 
-            crudController.deleteHabitacion(roomNumber);
+            crudController.deleteHabitacion(idRoom);
 
             JOptionPane.showMessageDialog(this, "Habitación eliminada exitosamente.");
         } catch (NumberFormatException e) {
-            JOptionPane.showMessageDialog(this, "Ingrese un número de habitación válido.", "Error", JOptionPane.ERROR_MESSAGE);
+            JOptionPane.showMessageDialog(this, "Ingrese un ID de habitación válido.", "Error", JOptionPane.ERROR_MESSAGE);
         }
     }
 }

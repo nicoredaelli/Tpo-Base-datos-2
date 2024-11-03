@@ -13,7 +13,7 @@ public class DBQueryControllerTest {
 
     public static void main(String[] args) {
         DatabaseQueryController controller = new DatabaseQueryController();
-        /*
+
         int idHotel = 28;
         List<PuntoDeInteres> puntosDeInteres = controller.getPOIsByIDHotel(idHotel);
 
@@ -46,7 +46,7 @@ public class DBQueryControllerTest {
             }
         } else {
             System.out.println("No se encontraron hoteles para el punto de interes con ID: " + idPoi);
-        }*/
+        }
 
         // Número de habitación a consultar
         int nroHabitacion = 2;

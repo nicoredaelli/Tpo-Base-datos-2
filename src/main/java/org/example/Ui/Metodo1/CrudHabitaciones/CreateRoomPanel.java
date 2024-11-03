@@ -86,7 +86,8 @@ public class CreateRoomPanel extends JPanel {
             }
 
             // Crear la habitación
-            Habitacion nuevaHabitacion = new Habitacion(roomNumber, hotelId, roomType, amenities);
+            int ultimoIDHabitacionDisponible = crudController.getUltimoIDHabitacion() + 1;
+            Habitacion nuevaHabitacion = new Habitacion(ultimoIDHabitacionDisponible, roomNumber, hotelId, roomType, amenities);
             crudController.createHabitacion(nuevaHabitacion);
 
             JOptionPane.showMessageDialog(this, "Habitación creada exitosamente");
