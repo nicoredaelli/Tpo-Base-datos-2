@@ -8,10 +8,18 @@ import org.example.controlador.DatabaseQueryController;
 import org.example.entidades.Hotel;
 import org.example.entidades.PuntoDeInteres;
 
+import javax.swing.*;
+import java.awt.*;
+import java.util.List;
+
+import javax.swing.*;
+import java.awt.*;
+import java.util.List;
+
 public class PuntosInteresCercanosHotelPanel extends JPanel {
     private MainFrame mainFrame;
     private DatabaseQueryController dbController;
-    private JComboBox<Hotel> hotelComboBox;
+    private JComboBox<String> hotelComboBox; // Mostrar solo el nombre
     private JTextArea puntosInteresTextArea;
 
     public PuntosInteresCercanosHotelPanel(MainFrame mainFrame) {
@@ -19,15 +27,17 @@ public class PuntosInteresCercanosHotelPanel extends JPanel {
         this.dbController = new DatabaseQueryController();
         setLayout(new BorderLayout());
 
+        // Obtener la lista de hoteles y configurar el combo box para mostrar solo los nombres
         List<Hotel> hoteles = dbController.getHotelesDisponibles();
-        hotelComboBox = new JComboBox<>(hoteles.toArray(new Hotel[0]));
+        hotelComboBox = new JComboBox<>(hoteles.stream().map(Hotel::getNombre).toArray(String[]::new));
 
         JButton searchButton = new JButton("Buscar Puntos de Interés");
         JButton backButton = new JButton("Regresar");
 
         searchButton.addActionListener(e -> {
-            Hotel selectedHotel = (Hotel) hotelComboBox.getSelectedItem();
-            if (selectedHotel != null) {
+            int selectedIndex = hotelComboBox.getSelectedIndex();
+            if (selectedIndex != -1) {
+                Hotel selectedHotel = hoteles.get(selectedIndex);
                 List<PuntoDeInteres> puntosDeInteres = dbController.getPOIsByIDHotel(selectedHotel.getIdHotel());
                 displayPuntosDeInteres(puntosDeInteres);
             }
@@ -35,7 +45,7 @@ public class PuntosInteresCercanosHotelPanel extends JPanel {
 
         backButton.addActionListener(e -> mainFrame.showPanel("Menu"));
 
-        JPanel inputPanel = new JPanel();
+        JPanel inputPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 10, 10));
         inputPanel.add(new JLabel("Hotel:"));
         inputPanel.add(hotelComboBox);
         inputPanel.add(searchButton);
@@ -43,7 +53,8 @@ public class PuntosInteresCercanosHotelPanel extends JPanel {
 
         add(inputPanel, BorderLayout.NORTH);
 
-        puntosInteresTextArea = new JTextArea(10, 30);
+        // Ajustar el tamaño del área de texto para hacer la pantalla más pequeña
+        puntosInteresTextArea = new JTextArea(8, 25);
         puntosInteresTextArea.setEditable(false);
         add(new JScrollPane(puntosInteresTextArea), BorderLayout.CENTER);
     }

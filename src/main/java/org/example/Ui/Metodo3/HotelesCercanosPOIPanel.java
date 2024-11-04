@@ -8,6 +8,17 @@ import org.example.controlador.DatabaseQueryController;
 import org.example.entidades.Hotel;
 import org.example.entidades.PuntoDeInteres;
 
+import javax.swing.*;
+import java.awt.*;
+import java.util.List;
+import javax.swing.*;
+import java.awt.*;
+import java.util.List;
+
+import javax.swing.*;
+import java.awt.*;
+import java.util.List;
+
 public class HotelesCercanosPOIPanel extends JPanel {
     private MainFrame mainFrame;
     private DatabaseQueryController dbController;
@@ -29,6 +40,8 @@ public class HotelesCercanosPOIPanel extends JPanel {
         gbc.insets = new Insets(5, 5, 5, 5);
         
         List<PuntoDeInteres> puntosDeInteres = dbController.getAllPuntosDeInteres();
+        
+        // Crear el JComboBox con los puntos de interés
         poiComboBox = new JComboBox<>(puntosDeInteres.toArray(new PuntoDeInteres[0]));
         
         JButton searchButton = new JButton("Buscar Hoteles");
@@ -93,4 +106,18 @@ public class HotelesCercanosPOIPanel extends JPanel {
             hotelesTextArea.setText(hotelesInfo.toString());
         }
     }
+
+    // Clase interna para renderizar los elementos del JComboBox
+    private class POIRenderer extends DefaultListCellRenderer {
+        @Override
+        public Component getListCellRendererComponent(JList<?> list, Object value, int index, boolean isSelected, boolean cellHasFocus) {
+            super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus);
+            if (value instanceof PuntoDeInteres) {
+                PuntoDeInteres poi = (PuntoDeInteres) value;
+                setText(poi.getNombre()); // Mostrar solo el nombre en el JComboBox
+            }
+            return this;
+        }
+    }
 }
+
