@@ -8,6 +8,17 @@ import org.example.controlador.DatabaseQueryController;
 import org.example.entidades.Habitacion;
 import org.example.entidades.Amenity;
 
+import javax.swing.*;
+import java.awt.*;
+import java.awt.event.ActionListener;
+import java.util.List;
+import javax.swing.*;
+import java.awt.*;
+import java.util.List;
+import javax.swing.*;
+import java.awt.*;
+import java.util.List;
+
 public class AmenitiesHabitacionPanel extends JPanel {
     private MainFrame mainFrame;
     private DatabaseQueryController dbController;
@@ -28,6 +39,7 @@ public class AmenitiesHabitacionPanel extends JPanel {
         GridBagConstraints gbc = new GridBagConstraints();
         gbc.insets = new Insets(5, 5, 5, 5);
         
+        // Recuperar habitaciones disponibles
         List<Habitacion> habitaciones = dbController.getHabitacionesDisponibles();
         habitacionComboBox = new JComboBox<>(habitaciones.toArray(new Habitacion[0]));
         
@@ -94,4 +106,3 @@ public class AmenitiesHabitacionPanel extends JPanel {
         }
     }
 }
-
