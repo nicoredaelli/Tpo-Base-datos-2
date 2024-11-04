@@ -48,7 +48,7 @@ public class ReservasPorHuespedPanel extends JPanel {
         add(new JScrollPane(resultArea), BorderLayout.CENTER);
     }
 
-    // Método para cargar los huéspedes en el JComboBox
+    // Metodo para cargar los huéspedes en el JComboBox
     private void loadHuespedesIntoDropdown() {
         List<Huesped> huespedesDisponibles = crudController.getHuespedesDisponiblesNico();  // Asume que hay un método getHuespedes() en CRUDController
         if (huespedesDisponibles != null && !huespedesDisponibles.isEmpty()) {

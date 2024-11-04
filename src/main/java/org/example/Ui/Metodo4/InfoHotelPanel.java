@@ -2,7 +2,6 @@ package org.example.Ui.Metodo4;
 
 import org.example.Ui.MainFrame;
 import org.example.controlador.CRUDController;
-import org.example.controlador.DatabaseQueryController;
 import org.example.entidades.Amenity;
 import org.example.entidades.Habitacion;
 import org.example.entidades.Hotel;

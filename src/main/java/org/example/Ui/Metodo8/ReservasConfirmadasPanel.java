@@ -10,7 +10,6 @@ import org.example.entidades.Reserva;
 import javax.swing.*;
 import java.awt.*;
 
-
 public class ReservasConfirmadasPanel extends JPanel {
     private CRUDController crudController;
     private JTextField codReservaField;

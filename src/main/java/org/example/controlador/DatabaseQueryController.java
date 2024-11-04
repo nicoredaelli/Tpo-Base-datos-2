@@ -3,6 +3,7 @@ package org.example.controlador;
 import com.mongodb.client.MongoDatabase;
 import com.mongodb.client.model.Projections;
 import io.mateu.dtos.Crud;
+import org.bson.types.ObjectId;
 import org.example.conexionmongo.MongoDBConnection;
 import org.example.conexionneo4j.Neo4jDBConnection;
 import org.example.entidades.*;
@@ -15,8 +16,10 @@ import com.mongodb.client.model.Filters;
 import org.bson.Document;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 public class DatabaseQueryController {
     private final MongoDatabase mongoDB;
@@ -173,6 +176,88 @@ public class DatabaseQueryController {
         }
         return reservas;
     }
+
+    // --------------------------  HABITACIONES DISPONIBLES ----------------------------------------
+    public List<Document> getHabitacionesDisponibles(Date checkin, Date checkout) {
+        try {
+            MongoCollection<Document> reservasCollection = mongoDB.getCollection("reservas");
+            MongoCollection<Document> habitacionesCollection = mongoDB.getCollection("habitaciones");
+
+            // Paso 1: Encontrar habitaciones ocupadas en el rango de fechas, excluyendo reservas canceladas
+            List<Integer> habitacionesOcupadas = reservasCollection.find(
+                            Filters.and(
+                                    Filters.ne("estado_reserva", "CANCELADO"), // Excluir reservas canceladas
+                                    Filters.lt("checkin", checkout), // Check-in antes del checkout solicitado
+                                    Filters.gt("checkout", checkin) // Checkout después del check-in solicitado
+                            )
+                    )
+                    .projection(Projections.include("id_habitacion")) // Proyección solo del id_habitacion
+                    .into(new ArrayList<>())
+                    .stream()
+                    .map(reserva -> reserva.getInteger("id_habitacion")) // Cambia a `getInteger` para `id_habitacion`
+                    .collect(Collectors.toList());
+
+            // Paso 2: Si no hay habitaciones ocupadas en el rango, devolver todas las habitaciones
+            if (habitacionesOcupadas.isEmpty()) {
+                return habitacionesCollection.find().into(new ArrayList<>()); // Retorna todas las habitaciones
+            }
+
+            // Paso 3: Si hay habitaciones ocupadas, obtener las habitaciones que no están en el conjunto de habitaciones ocupadas
+            List<Document> habitacionesDisponibles = habitacionesCollection.find(
+                    Filters.nin("id_habitacion", habitacionesOcupadas) // Filtra por `id_habitacion` en lugar de `_id`
+            ).into(new ArrayList<>());
+
+            return habitacionesDisponibles;
+        } catch (Exception e) {
+            System.err.println("Error al consultar habitaciones disponibles: " + e.getMessage());
+            return null;
+        }
+    }
+
+// --------------------------  RESERVAS POR FECHA  ----------------------------------------
+
+    public List<Document> ReservasPorFechaYHotel(Date fechaDada, int hotelId) {
+        List<Document> reservas = new ArrayList<>();
+
+        try {
+            MongoCollection<Document> reservasCollection = mongoDB.getCollection("reservas");
+
+            // Ejecuta la consulta en MongoDB para obtener reservas en el rango de fechas y para el hotel específico
+            reservas = reservasCollection.find(
+                    Filters.and(
+                            Filters.lte("checkin", fechaDada),
+                            Filters.gte("checkout", fechaDada),
+                            Filters.eq("id_hotel", hotelId) // Filtro adicional para el ID del hotel
+                    )
+            ).into(new ArrayList<>());
+
+        } catch (Exception e) {
+            System.err.println("Error al consultar reservas por fecha y hotel: " + e.getMessage());
+        }
+
+        return reservas;
+    }
+
+
+// --------------------------  DETALLE DE HUESPED POR ID ----------------------------------------
+
+    public Document HuespedPorID(int idHuesped) {
+        try {
+            MongoCollection<Document> huespedesCollection = mongoDB.getCollection("huespedes");
+
+            // Ejecuta la consulta en MongoDB para encontrar el huésped por ID
+            Document huesped = huespedesCollection.find(
+                    new Document("id_huesped", idHuesped)
+            ).first();
+
+            return huesped;
+
+        } catch (Exception e) {
+            System.err.println("Error al consultar el huésped por ID: " + e.getMessage());
+            return null;
+        }
+    }
+
 
 }
 
