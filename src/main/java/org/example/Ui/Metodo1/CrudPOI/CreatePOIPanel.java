@@ -5,36 +5,50 @@ import java.awt.*;
 import org.example.Ui.MainFrame;
 import org.example.controlador.CRUDController;
 import org.example.entidades.PuntoDeInteres;
+import org.example.entidades.Zona;
 import org.bson.types.ObjectId;
 
+import javax.swing.*;
+import java.util.List;
+
 public class CreatePOIPanel extends JPanel {
-    private JTextField nombreField, descripcionField, zonaIdField;
+    private JTextField nombreField, descripcionField;
+    private JComboBox<String> zonaDropdown;
     private CRUDController crudController;
+    private List<Zona> zonasDisponibles;
 
     public CreatePOIPanel(MainFrame mainFrame) {
         crudController = new CRUDController();
-
+        
         setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
 
-        // Campos de texto para ingresar el nombre, descripción y zona ID del POI
+        // Inicializar campos de entrada
         nombreField = new JTextField(20);
         descripcionField = new JTextField(50);
-        zonaIdField = new JTextField(10);
+
+        // Obtener la lista de zonas disponibles desde el CRUDController
+        zonasDisponibles = crudController.getZonasDisponibles();
+
+        // Crear la lista desplegable con los nombres de las zonas
+        zonaDropdown = new JComboBox<>(zonasDisponibles.stream()
+                .map(Zona::getNombre)
+                .toArray(String[]::new));
 
         add(new JLabel("Nombre del POI:"));
         add(nombreField);
         add(new JLabel("Descripción del POI:"));
         add(descripcionField);
-        add(new JLabel("ID de la Zona:"));
-        add(zonaIdField);
+        add(new JLabel("Zona:"));
+        add(zonaDropdown);
 
-        // Botón para crear el POI
         JButton createButton = new JButton("Crear POI");
-        createButton.addActionListener(e -> createPOI());
+        createButton.addActionListener(e -> {
+            createPOI();
+            clearFields();
+        });
 
-        // Botón para regresar al panel anterior
         JButton backButton = new JButton("Regresar");
-        backButton.addActionListener(e -> mainFrame.showPanel("POICRUDPanel")); // Ajusta el nombre si es necesario
+        backButton.addActionListener(e -> mainFrame.showPanel("POICRUDPanel"));
 
         add(createButton);
         add(backButton);
@@ -42,36 +56,39 @@ public class CreatePOIPanel extends JPanel {
 
     private void createPOI() {
         try {
-            // Obtener el último ID de POI y generar uno nuevo incrementado
             int idPoi = crudController.getUltimoIdPuntoDeInteres() + 1;
 
-            // Obtener los datos ingresados
+            // Obtener datos ingresados
             String nombre = nombreField.getText();
             String descripcion = descripcionField.getText();
-            int zonaId = Integer.parseInt(zonaIdField.getText());
+
+            // Obtener el ID de la zona seleccionada
+            int zonaId = zonasDisponibles.get(zonaDropdown.getSelectedIndex()).getIdZona();
 
             // Crear el nuevo POI
             PuntoDeInteres nuevoPuntoDeInteres = new PuntoDeInteres(
-                    new ObjectId(),   // Genera un nuevo ObjectId
+                    new ObjectId(),
                     idPoi,
                     nombre,
                     descripcion,
                     zonaId
             );
 
-            // Guardar el POI en la base de datos
             crudController.createPuntoDeInteres(nuevoPuntoDeInteres);
-
             JOptionPane.showMessageDialog(this, "Punto de Interés creado exitosamente con ID: " + idPoi);
 
             // Limpiar los campos después de la creación
-            nombreField.setText("");
-            descripcionField.setText("");
-            zonaIdField.setText("");
+            clearFields();
 
-        } catch (NumberFormatException e) {
-            JOptionPane.showMessageDialog(this, "Por favor, ingrese un valor numérico válido para el ID de la Zona.", "Error", JOptionPane.ERROR_MESSAGE);
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(this, "Error al crear el POI.", "Error", JOptionPane.ERROR_MESSAGE);
         }
     }
-}
 
+    // Método para limpiar los campos de texto y restablecer el desplegable
+    private void clearFields() {
+        nombreField.setText("");
+        descripcionField.setText("");
+        zonaDropdown.setSelectedIndex(0);
+    }
+}

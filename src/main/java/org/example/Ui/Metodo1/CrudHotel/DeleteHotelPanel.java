@@ -7,31 +7,31 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import javax.swing.BoxLayout;
-import javax.swing.JButton;
-import javax.swing.JLabel;
-import javax.swing.JOptionPane;
-import javax.swing.JPanel;
-import javax.swing.JTextField;
-
 import org.bson.types.ObjectId;
 import org.example.Ui.MainFrame;
 import org.example.controlador.CRUDController;
 import org.example.entidades.Hotel;
 
-public class DeleteHotelPanel extends JPanel {
-    private JTextField idField;
+import javax.swing.*;
+import java.awt.*;
+import java.util.List;
 
-    CRUDController crudController = new CRUDController();
+public class DeleteHotelPanel extends JPanel {
+    private JComboBox<String> hotelDropdown; // Cuadro desplegable para seleccionar el hotel
+    private CRUDController crudController = new CRUDController();
 
     public DeleteHotelPanel(MainFrame mainFrame) {
         setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
 
-        idField = new JTextField();
-        idField.setPreferredSize(new Dimension(10, 30)); // Establecer un tamaño preferido
+        // Obtener la lista de hoteles disponibles desde el CRUDController
+        List<Hotel> hotelesDisponibles = crudController.getHotelesDisponibles();
+        String[] hotelNames = hotelesDisponibles.stream().map(Hotel::getNombre).toArray(String[]::new);
 
-        add(new JLabel("Id a Eliminar:"));
-        add(idField);
+        // Crear el JComboBox para seleccionar el hotel
+        hotelDropdown = new JComboBox<>(hotelNames);
+        hotelDropdown.setPreferredSize(new Dimension(5, -5));
+        add(new JLabel("Seleccione un hotel a eliminar:"));
+        add(hotelDropdown);
 
         JButton deleteButton = new JButton("Eliminar");
         deleteButton.addActionListener(e -> eliminarHotel());
@@ -45,11 +45,21 @@ public class DeleteHotelPanel extends JPanel {
 
     private void eliminarHotel() {
         try {
-            int id = Integer.parseInt(idField.getText());
-            crudController.deleteHotel(id);
-            JOptionPane.showMessageDialog(this, "Hotel " + id + " eliminado exitosamente");
-        } catch (NumberFormatException e) {
-            JOptionPane.showMessageDialog(this, "Por favor, ingrese un ID válido.", "Error", JOptionPane.ERROR_MESSAGE);
+            String selectedHotelName = (String) hotelDropdown.getSelectedItem();
+            Hotel hotel = crudController.getHotelesDisponibles().stream()
+                .filter(h -> h.getNombre().equals(selectedHotelName))
+                .findFirst()
+                .orElse(null);
+
+            if (hotel != null) {
+                int idHotel = hotel.getIdHotel(); // Obtener el ID del hotel seleccionado
+                crudController.deleteHotel(idHotel);
+                JOptionPane.showMessageDialog(this, "Hotel " + selectedHotelName + " eliminado exitosamente.");
+            } else {
+                JOptionPane.showMessageDialog(this, "Hotel no encontrado.", "Error", JOptionPane.ERROR_MESSAGE);
+            }
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(this, "Ocurrió un error al eliminar el hotel.", "Error", JOptionPane.ERROR_MESSAGE);
         }
     }
 }
