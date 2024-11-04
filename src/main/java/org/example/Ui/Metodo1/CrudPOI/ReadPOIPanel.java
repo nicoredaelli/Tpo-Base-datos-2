@@ -7,50 +7,64 @@ import org.example.controlador.CRUDController;
 import org.example.entidades.PuntoDeInteres;
 
 
-
-
+import javax.swing.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.util.List;
+import javax.swing.*;
+import java.util.List;
 public class ReadPOIPanel extends JPanel {
-    private JTextField idField;
+    private JComboBox<String> poiDropdown;
     private JTextArea resultArea;
     private CRUDController crudController;
 
     public ReadPOIPanel(MainFrame mainFrame) {
         crudController = new CRUDController();
-
         setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
 
-        idField = new JTextField(10);
-        resultArea = new JTextArea(5, 30);
-        resultArea.setEditable(false); // Solo lectura
+        // Obtener la lista de puntos de interés disponibles desde el CRUDController
+        List<PuntoDeInteres> puntosDeInteresDisponibles = crudController.getPuntosDeInteresDisponibles();
+        String[] poiNames = new String[puntosDeInteresDisponibles.size()];
+        for (int i = 0; i < puntosDeInteresDisponibles.size(); i++) {
+            poiNames[i] = puntosDeInteresDisponibles.get(i).getNombre(); // Cambiar para mostrar el nombre
+        }
 
-        add(new JLabel("ID del POI:"));
-        add(idField);
+        // Crear el JComboBox para seleccionar el punto de interés
+        poiDropdown = new JComboBox<>(poiNames);
+        poiDropdown.setPreferredSize(new Dimension(150, 25));
+        add(new JLabel("Seleccione un Punto de Interés:"));
+        add(poiDropdown);
 
+        // Botón para leer el POI
         JButton readButton = new JButton("Leer POI");
         readButton.addActionListener(e -> readPOI());
-
-        JButton backButton = new JButton("Regresar");
-        backButton.addActionListener(e -> mainFrame.showPanel("POICRUDPanel")); // Ajusta el nombre si es necesario
-
         add(readButton);
+
+        // Área de texto para mostrar los resultados
+        resultArea = new JTextArea(5, 20);
+        resultArea.setEditable(false);
+        add(new JScrollPane(resultArea));
+
+        // Botón para regresar al panel anterior
+        JButton backButton = new JButton("Regresar");
+        backButton.addActionListener(e -> mainFrame.showPanel("POICRUDPanel"));
         add(backButton);
-        add(new JScrollPane(resultArea)); // Para ver el contenido del POI en un área de texto desplazable
     }
 
     private void readPOI() {
-        try {
-            int idPoi = Integer.parseInt(idField.getText());
-            
-            // Leer el POI desde la base de datos
-            PuntoDeInteres puntoDeInteres = crudController.readPuntoDeInteres(idPoi);
+        String selectedPOIName = (String) poiDropdown.getSelectedItem();
+        PuntoDeInteres puntoDeInteres = crudController.getPuntosDeInteresDisponibles().stream()
+            .filter(p -> p.getNombre().equals(selectedPOIName))
+            .findFirst()
+            .orElse(null);
 
-            if (puntoDeInteres != null) {
-                resultArea.setText("Punto de Interés encontrado:\n" + puntoDeInteres.toString());
-            } else {
-                resultArea.setText("No se encontró el punto de interés con el ID: " + idPoi);
-            }
-        } catch (NumberFormatException e) {
-            JOptionPane.showMessageDialog(this, "Por favor, ingrese un valor numérico válido para el ID del POI.", "Error", JOptionPane.ERROR_MESSAGE);
+        if (puntoDeInteres != null) {
+            resultArea.setText("Punto de Interés encontrado:\n"
+                + "ID: " + puntoDeInteres.getIdPoi() + "\n"
+                + "Nombre: " + puntoDeInteres.getNombre() + "\n"
+                + "Descripción: " + puntoDeInteres.getDescripcion());
+        } else {
+            resultArea.setText("Punto de interés no encontrado.");
         }
     }
 }

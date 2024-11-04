@@ -1,6 +1,11 @@
 package org.example.controlador;
 
+
+import com.mongodb.ReadPreference;
+import com.mongodb.client.FindIterable;
+
 import com.mongodb.client.MongoCollection;
+import com.mongodb.client.MongoCursor;
 import com.mongodb.client.MongoDatabase;
 import com.mongodb.client.model.Filters;
 import com.mongodb.client.model.Updates;
@@ -11,6 +16,11 @@ import org.example.conexionneo4j.Neo4jDBConnection;
 import org.example.entidades.*;
 import org.neo4j.driver.Driver;
 import org.neo4j.driver.Session;
+
+
+import java.sql.Date;
+import java.text.SimpleDateFormat;
+import java.time.ZoneId;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -387,6 +397,41 @@ public class CRUDController {
             System.err.println("Error al eliminar el punto de interes en Neo4j: " + e.getMessage());
         }
     }
+
+
+    public List<PuntoDeInteres> getPuntosDeInteresDisponibles() {
+        List<PuntoDeInteres> puntosDeInteres = new ArrayList<>();
+    
+        try {
+            MongoCollection<Document> collection = mongoDB.getCollection("pois");
+    
+            // Comprobar si la colección tiene documentos
+            if (collection.countDocuments() == 0) {
+                System.out.println("La colección de puntos de interés está vacía.");
+            } else {
+                System.out.println("Documentos encontrados en la colección de puntos de interés: " + collection.countDocuments());
+            }
+    
+            // Obtener todos los documentos y convertirlos a objetos PuntoDeInteres
+            for (Document doc : collection.find()) {
+                PuntoDeInteres poi = new PuntoDeInteres(
+                        doc.getObjectId("_id"),
+                        doc.getInteger("id_poi"),
+                        doc.getString("nombre"),
+                        doc.getString("descripcion"),
+                        doc.getInteger("zona")
+                );
+                puntosDeInteres.add(poi);
+            }
+    
+        } catch (Exception e) {
+            System.err.println("Error al obtener los puntos de interés: " + e.getMessage());
+        }
+    
+        return puntosDeInteres;
+    }
+    
+    
 //--------------------------------------------------------------------------------------------------------------------------------
 // CRUD para la entidad Amenity
 public void createAmenity(Amenity amenity) {
@@ -499,7 +544,30 @@ public void deleteAmenity(int idAmenity) {
         System.err.println("Error al eliminar amenity en Neo4j: " + e.getMessage());
     }
 }
+public List<Amenity> getAmenitiesDisponibles() {
+    List<Amenity> amenities = new ArrayList<>();
 
+    try {
+        // Conectar a la base de datos y obtener la colección de amenities
+        MongoCollection<Document> collection = mongoDB.getCollection("amenities");
+
+        // Obtener todos los documentos y convertirlos a objetos Amenity
+        for (Document doc : collection.find()) {
+            Amenity amenity = new Amenity(
+                doc.getObjectId("_id")
+                , doc.getInteger("id_amenity"),
+                doc.getString("nombre"),
+                doc.getString("descripcion")
+            );
+            amenities.add(amenity);
+        }
+
+    } catch (Exception e) {
+        System.err.println("Error al obtener los amenities: " + e.getMessage());
+    }
+
+    return amenities;
+}
 
 //------------------------------------------------------------------------------------------------------------------------------------
     // CRUD para la entidad Habitacion neo4jDB mongoDB
@@ -659,6 +727,7 @@ public void createHabitacion(Habitacion habitacion) {
         }
     }
 
+
     public void deleteHabitacion(int idHabitacion) {
         Habitacion habitacion = this.readHabitacion(idHabitacion);
         if (habitacion != null) {
@@ -736,7 +805,32 @@ public void createHabitacion(Habitacion habitacion) {
     }
 
 
+    public List<Habitacion> getHabitacionesDisponibles() {
+        List<Habitacion> habitaciones = new ArrayList<>();
 
+        // Conectar a la colección de habitaciones
+        MongoCollection<Document> collection = mongoDB.getCollection("habitaciones");
+
+        try (MongoCursor<Document> cursor = collection.find().iterator()) {
+            while (cursor.hasNext()) {
+                Document doc = cursor.next();
+                int idHabitacion = doc.getInteger("idHabitacion"); // Obtener el ID de la habitación
+                int nroHabitacion = doc.getInteger("nroHabitacion");
+                int idHotel = doc.getInteger("idHotel");
+                String tipoHabitacion = doc.getString("tipoHabitacion");
+                List<Integer> amenities = (List<Integer>) doc.get("amenities");
+
+                // Crear un objeto Habitacion y agregarlo a la lista
+                Habitacion habitacion = new Habitacion(idHabitacion, nroHabitacion, idHotel, tipoHabitacion, amenities);
+                habitaciones.add(habitacion);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            // Manejo de errores, puedes lanzar una excepción o retornar una lista vacía
+        }
+
+        return habitaciones;
+    }
 
 
     //------------------------------------------------------------------------------------------------------------------------------------
@@ -820,7 +914,32 @@ public void deleteReserva(int codReserva) {
     }
 }
 
+public List<Reserva> getReservasDisponibles() {
+        List<Reserva> reservas = new ArrayList<>();
+        MongoCollection<Document> collection = mongoDB.getCollection("reservas"); // Cambia el nombre de la colección según tu estructura
 
+        // Obtener todas las reservas de la colección
+        FindIterable<Document> documentos = collection.find();
+        for (Document doc : documentos) {
+            int codReserva = doc.getInteger("codReserva");
+            Date checkin = (Date) doc.getDate("checkin");
+            Date checkout = (Date) doc.getDate("checkout");
+            EstadoReserva estadoReserva = EstadoReserva.valueOf(doc.getString("estadoReserva")); // Asegúrate de que coincide con tu Enum
+            double tarifa = doc.getDouble("tarifa");
+            int idHotel = doc.getInteger("idHotel");
+            int idHabitacion = doc.getInteger("idHabitacion");
+            int idHuesped = doc.getInteger("idHuesped");
+
+            // Crear objeto Reserva y agregarlo a la lista
+            Reserva reserva = new Reserva(codReserva, checkin, checkout, estadoReserva, tarifa, idHotel, idHabitacion, idHuesped);
+            reservas.add(reserva);
+        }
+        return reservas;
+    }
+   
+
+
+    
 
 //------------------------------------------------------------------------------------------------------------------------------------
     // CRUD para la entidad Huesped
@@ -951,17 +1070,18 @@ public void deleteReserva(int codReserva) {
         }
     }
 
-    public List<Huesped> getHuespedesDisponiblesNico() {
-        List<Huesped> huespedes = new ArrayList<>();
 
+    public List<Huesped> getHuespedesDisponibles() {
+        List<Huesped> huespedes = new ArrayList<>();
+    
         try {
             // Conectar a la base de datos y obtener la colección de huéspedes
             MongoCollection<Document> collection = mongoDB.getCollection("huespedes");
-
+    
             // Obtener todos los documentos y convertirlos a objetos Huesped
             for (Document doc : collection.find()) {
                 Map<String, String> direccion = new HashMap<>();
-
+    
                 // Acceder al objeto 'direccion' y obtener los campos
                 Document direccionDoc = doc.get("direccion", Document.class);
                 if (direccionDoc != null) {
@@ -971,26 +1091,41 @@ public void deleteReserva(int codReserva) {
                     direccion.put("pais", direccionDoc.getString("pais"));
                 }
 
+    
                 // Crear el objeto Huesped
                 Huesped huesped = new Huesped(
-                        doc.getObjectId("_id"), // Suponiendo que necesitas el ObjectId
-                        doc.getInteger("id_huesped"),
-                        doc.getString("nombre"),
-                        doc.getString("apellido"),
-                        doc.getString("telefono"),
-                        doc.getString("email"),
-                        direccion // Pasar el mapa de dirección
+                    doc.getObjectId("_id"), // Suponiendo que necesitas el ObjectId
+                    doc.getInteger("id_huesped"),
+                    doc.getString("nombre"),
+                    doc.getString("apellido"),
+                    doc.getString("telefono"),
+                    doc.getString("email"),
+                    direccion // Pasar el mapa de dirección
                 );
-
+    
                 huespedes.add(huesped);
             }
-
+    
         } catch (Exception e) {
             System.err.println("Error al obtener los huéspedes: " + e.getMessage());
         }
-
+    
         return huespedes;
     }
+    
+    
+    
+    public Huesped readHuespedByName(String nombre, String apellido) {
+        List<Huesped> huespedes = getHuespedesDisponibles(); // Obtener la lista de huéspedes
+    
+        for (Huesped huesped : huespedes) {
+            if (huesped.getNombre().equals(nombre) && huesped.getApellido().equals(apellido)) {
+                return huesped; // Devolver el huésped que coincide
+            }
+        }
+        return null; // Si no se encontró, devolver null
+    }
+    
 
 //----------------------------------------------------------------------------------------------------
 
@@ -1065,24 +1200,38 @@ public void deleteReserva(int codReserva) {
         }
     }
 
-    public void deleteZona(int idZona) {
-        // MongoDB
-        MongoCollection<Document> collection = mongoDB.getCollection("zonas");
-        collection.deleteOne(Filters.eq("id_zona", idZona));
-        System.out.println("Zona eliminada en MongoDB con idZona: " + idZona);
+  
 
-        // Neo4j
-        try (Session session = neo4jDB.session()) {
-            session.writeTransaction(tx -> {
-                tx.run("MATCH (z:zona {id_zona: $idZona}) DETACH DELETE z",
-                        Map.of("idZona", idZona));
-                return null;
-            });
-            System.out.println("Zona eliminada en Neo4j con idZona: " + idZona);
-        } catch (Exception e) {
-            System.err.println("Error al eliminar zona en Neo4j: " + e.getMessage());
+
+public void deleteZona(int idZona) {
+    MongoCollection<Document> collection = mongoDB.getCollection("zonas");
+    collection.deleteOne(Filters.eq("id_zona", idZona));
+}
+public List<Zona> getZonasDisponibles() {
+    List<Zona> zonas = new ArrayList<>();
+
+    try {
+        // Conectar a la base de datos y obtener la colección de zonas
+        MongoCollection<Document> collection = mongoDB.getCollection("zonas");
+
+        // Obtener todos los documentos y convertirlos a objetos Zona
+        for (Document doc : collection.find()) {
+            Zona zona = new Zona(
+                doc.getInteger("id_zona"),
+                doc.getString("nombre"),
+                doc.getString("provincia"),
+                doc.getString("pais"),
+                doc.getString("descripcion")
+            );
+            zonas.add(zona);
         }
+
+    } catch (Exception e) {
+        System.err.println("Error al obtener las zonas: " + e.getMessage());
     }
+
+    return zonas;
+}
 
 
 
@@ -1175,6 +1324,9 @@ public void deleteReserva(int codReserva) {
     public void aumentarUltimoIDZona() {
         mongoDB.getCollection("contadores").updateOne(new Document("_id", "id_zona"), new Document("$inc", new Document("seq", 1)));
     }
+
+    
+    
 
 
 

@@ -5,9 +5,16 @@ import javax.swing.*;
 import java.awt.*;
 import org.example.Ui.MainFrame;
 import org.example.controlador.CRUDController;
+import org.example.entidades.Amenity;
+
+import javax.swing.*;
+import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.util.List;
 
 public class DeleteAmenitiePanel extends JPanel {
-    private JTextField idField;
+    private JComboBox<String> amenityComboBox; // ComboBox para seleccionar el amenity
     private CRUDController crudController;
 
     public DeleteAmenitiePanel(MainFrame mainFrame) {
@@ -18,20 +25,25 @@ public class DeleteAmenitiePanel extends JPanel {
         setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
         
         // Crear y agregar componentes de la interfaz
-        JLabel idLabel = new JLabel("ID del Amenity a Eliminar:");
-        idField = new JTextField(10); // Limita el tamaño del campo
+        JLabel selectLabel = new JLabel("Selecciona el Amenity a Eliminar:");
+        
+        // Obtener la lista de amenities y llenar el combo box
+        List<Amenity> amenities = crudController.getAmenitiesDisponibles();
+        String[] amenityNames = amenities.stream().map(Amenity::getNombre).toArray(String[]::new);
+        
+        amenityComboBox = new JComboBox<>(amenityNames); // Crear el combo box con los nombres de amenities
         JButton deleteButton = new JButton("Eliminar");
         JButton backButton = new JButton("Regresar");
 
         // Acción del botón Eliminar
-        deleteButton.addActionListener(e -> eliminarAmenity());
+        deleteButton.addActionListener(e -> eliminarAmenity(amenities));
 
         // Acción del botón Regresar
         backButton.addActionListener(e -> mainFrame.showPanel("AmenityCRUDPanel"));
 
         // Añadir componentes al panel
-        add(idLabel);
-        add(idField);
+        add(selectLabel);
+        add(amenityComboBox);
         add(deleteButton);
         add(backButton);
 
@@ -39,14 +51,26 @@ public class DeleteAmenitiePanel extends JPanel {
         setAlignmentX(Component.CENTER_ALIGNMENT);
     }
 
-    private void eliminarAmenity() {
-
-        // Obtener el ID ingresado y convertirlo en número
-        int idAmenity = Integer.parseInt(idField.getText());
-
-        // Llamar al método de eliminación en el controlador
-        crudController.deleteAmenity(idAmenity);
+    private void eliminarAmenity(List<Amenity> amenities) {
+        // Obtener el nombre seleccionado del combo box
+        String selectedAmenityName = (String) amenityComboBox.getSelectedItem();
         
+        // Buscar el ID correspondiente al nombre seleccionado
+        Amenity amenityToDelete = amenities.stream()
+                .filter(amenity -> amenity.getNombre().equals(selectedAmenityName))
+                .findFirst()
+                .orElse(null);
+        
+        if (amenityToDelete != null) {
+            int idAmenity = amenityToDelete.getIdAmenity();
+            // Llamar al método de eliminación en el controlador
+            crudController.deleteAmenity(idAmenity);
+            JOptionPane.showMessageDialog(this, "Amenity " + selectedAmenityName + " eliminado exitosamente");
+        } else {
+            JOptionPane.showMessageDialog(this, "Error al eliminar el amenity.", "Error", JOptionPane.ERROR_MESSAGE);
+        }
     }
 }
+
+
 
