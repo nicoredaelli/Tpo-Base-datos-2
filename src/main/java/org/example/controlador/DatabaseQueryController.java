@@ -202,5 +202,28 @@ public class DatabaseQueryController {
         }
         return puntosDeInteres;
     }
+
+    public List<Hotel> getHotelesDisponibles() {
+        List<Hotel> hoteles = new ArrayList<>();
+        try {
+            MongoCollection<Document> collection = mongoDB.getCollection("hoteles");
+            for (Document doc : collection.find()) {
+                Hotel hotel = new Hotel(
+                    doc.getObjectId("_id"),
+                    doc.getInteger("id_hotel"),
+                    doc.getString("nombre"),
+                    doc.getString("telefono"),
+                    doc.getString("email"),
+                    (Map<String, String>) doc.get("direccion"),
+                    (List<Integer>) doc.get("habitaciones"),
+                    doc.getInteger("zona")
+                );
+                hoteles.add(hotel);
+            }
+        } catch (Exception e) {
+            System.err.println("Error al obtener los hoteles disponibles: " + e.getMessage());
+        }
+        return hoteles;
+    }
 }
 

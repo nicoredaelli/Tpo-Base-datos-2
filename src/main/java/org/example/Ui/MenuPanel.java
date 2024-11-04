@@ -36,6 +36,9 @@ public class MenuPanel extends JPanel {
                 case "Hoteles Cercanos a Puntos de Interés":
                     mainFrame.showPanel("HotelesCercanosPOI");
                     break;
+                case "Puntos de Interés Cercanos al Hotel":
+                    mainFrame.showPanel("PuntosInteresCercanosHotel");
+                    break;
                 default:
                     System.out.println("Botón no implementado: " + command);
                     break;
