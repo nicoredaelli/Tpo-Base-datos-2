@@ -10,6 +10,7 @@ import javax.swing.SwingUtilities;
 import org.example.Ui.Metodo2.*;
 import org.example.Ui.Metodo2.CrudHuesped.*;
 import org.example.Ui.Metodo2.CrudReserva.*;
+import org.example.Ui.Metodo3.HotelesCercanosPOIPanel;
 import org.example.Ui.Metodo1.*;
 import org.example.Ui.Metodo1.CrudAmenitie.*;
 import org.example.Ui.Metodo1.CrudHabitaciones.*;
@@ -73,9 +74,7 @@ public class MainFrame extends JFrame {
         mainPanel.add(new UpdateHuespedPanel(this), "UpdateHuespedPanel");
         mainPanel.add(new DeleteHuespedPanel(this), "DeleteHuespedPanel");
 
-        
-
-
+        mainPanel.add(new HotelesCercanosPOIPanel(this), "HotelesCercanosPOI");
 
         add(mainPanel);
         setTitle("Administrador de Hoteles");

@@ -33,7 +33,9 @@ public class MenuPanel extends JPanel {
                 case "Gestión de Huéspedes y Reservas":
                     mainFrame.showPanel("GestiónHR"); // Este nombre debe coincidir con el panel agregado
                     break;
-                // Agrega más casos según los botones restantes
+                case "Hoteles Cercanos a Puntos de Interés":
+                    mainFrame.showPanel("HotelesCercanosPOI");
+                    break;
                 default:
                     System.out.println("Botón no implementado: " + command);
                     break;
