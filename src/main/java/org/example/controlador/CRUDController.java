@@ -268,6 +268,9 @@ public class CRUDController {
             System.err.println("Error al eliminar el hotel en Neo4j: " + e.getMessage());
         }
     }
+
+    
+
 //---------------------------------------------------------------------------------------------------------------------------------
     // CRUD para la entidad PuntoDeInteres
     public void createPuntoDeInteres(PuntoDeInteres poi) {

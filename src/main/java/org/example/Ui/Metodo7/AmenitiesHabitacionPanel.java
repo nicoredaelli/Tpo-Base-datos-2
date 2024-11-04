@@ -8,16 +8,6 @@ import org.example.controlador.DatabaseQueryController;
 import org.example.entidades.Habitacion;
 import org.example.entidades.Amenity;
 
-import javax.swing.*;
-import java.awt.*;
-import java.awt.event.ActionListener;
-import java.util.List;
-import javax.swing.*;
-import java.awt.*;
-import java.util.List;
-import javax.swing.*;
-import java.awt.*;
-import java.util.List;
 
 public class AmenitiesHabitacionPanel extends JPanel {
     private MainFrame mainFrame;

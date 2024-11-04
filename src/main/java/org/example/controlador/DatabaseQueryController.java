@@ -127,7 +127,7 @@ public class DatabaseQueryController {
             // Paso 1: Obtener los IDs de los amenities relacionados con la habitación en Neo4j
             Result result = session.run(
                         "MATCH (h:habitacion{nro_habitacion:$nroHabitacion})-[:TIENE_AMENITY]->(a:amenity) " +
-                                "RETURN a.id_amenity AS id_amenity",
+                                "RETURN DISTINCT a.id_amenity AS id_amenity",
                     Map.of("nroHabitacion", nroHabitacion)
             );
 
@@ -385,4 +385,3 @@ public class DatabaseQueryController {
 
 
 }
-
