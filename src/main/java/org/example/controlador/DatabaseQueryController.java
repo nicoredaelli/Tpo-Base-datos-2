@@ -1,11 +1,11 @@
 package org.example.controlador;
 
 import com.mongodb.client.MongoDatabase;
+import com.mongodb.client.model.Projections;
+import io.mateu.dtos.Crud;
 import org.example.conexionmongo.MongoDBConnection;
 import org.example.conexionneo4j.Neo4jDBConnection;
-import org.example.entidades.Amenity;
-import org.example.entidades.Hotel;
-import org.example.entidades.PuntoDeInteres;
+import org.example.entidades.*;
 import org.neo4j.driver.Driver;
 import org.neo4j.driver.Result;
 import org.neo4j.driver.Session;
@@ -21,10 +21,12 @@ import java.util.Map;
 public class DatabaseQueryController {
     private final MongoDatabase mongoDB;
     private final Driver neo4jDB;
+    private final CRUDController crudController;
 
     public DatabaseQueryController() {
         this.mongoDB = MongoDBConnection.getDatabase();
         this.neo4jDB = Neo4jDBConnection.getConnection();
+        this.crudController = new CRUDController();
     }
 
     public List<PuntoDeInteres> getPOIsByIDHotel(int idHotel) {
@@ -146,5 +148,31 @@ public class DatabaseQueryController {
 
         return amenities;
     }
+
+    public List<Reserva> findReservasByHuesped(int idHuesped) {
+        MongoCollection<Document> collection = mongoDB.getCollection("reservas");
+        List<Document> reservasDocs = collection.find(Filters.eq("id_huesped", idHuesped)).into(new ArrayList<>());
+
+        List<Reserva> reservas = new ArrayList<>();
+        for (Document doc : reservasDocs) {
+            try {
+                Reserva reserva = new Reserva(
+                        doc.getInteger("cod_reserva"),
+                        doc.getDate("checkin"),
+                        doc.getDate("checkout"),
+                        EstadoReserva.valueOf(doc.getString("estado_reserva")),
+                        doc.getDouble("tarifa"),
+                        doc.getInteger("id_hotel"),
+                        doc.getInteger("id_habitacion"),
+                        doc.getInteger("id_huesped")
+                );
+                reservas.add(reserva);
+            } catch (Exception e) {
+                System.err.println("Error al mapear reserva: " + e.getMessage());
+            }
+        }
+        return reservas;
+    }
+
 }
 

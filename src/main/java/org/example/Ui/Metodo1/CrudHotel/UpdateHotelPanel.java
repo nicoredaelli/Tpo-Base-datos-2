@@ -127,7 +127,10 @@ public class UpdateHotelPanel extends JPanel {
             direccion.put("pais", country);
 
             // Actualizar el hotel
-            crudController.updateHotel(id, name, phone, direccion, email, zone);
+
+            Hotel hotel = crudController.readHotel(id);
+
+            crudController.updateHotel(id, name, phone, direccion, email, hotel.getHabitaciones(), zone);
             
             JOptionPane.showMessageDialog(this, "Hotel actualizado exitosamente.");
         } catch (NumberFormatException e) {

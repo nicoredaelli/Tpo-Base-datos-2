@@ -15,6 +15,9 @@ import org.example.Ui.Metodo1.CrudAmenitie.*;
 import org.example.Ui.Metodo1.CrudHabitaciones.*;
 import org.example.Ui.Metodo1.CrudHotel.*;
 import org.example.Ui.Metodo1.CrudPOI.*;
+import org.example.Ui.Metodo4.InfoHotelPanel;
+import org.example.Ui.Metodo8.ReservasConfirmadasPanel;
+import org.example.Ui.Metodo9.ReservasPorHuespedPanel;
 
 import java.awt.CardLayout;
 
@@ -73,9 +76,17 @@ public class MainFrame extends JFrame {
         mainPanel.add(new UpdateHuespedPanel(this), "UpdateHuespedPanel");
         mainPanel.add(new DeleteHuespedPanel(this), "DeleteHuespedPanel");
 
-        
+        //---------------------------------------EJERCICIO 4 ---------------------------------------------------------------------------------------------------------------------------------------
 
+        mainPanel.add(new InfoHotelPanel(this), "InfoHotelPanel");
 
+        //---------------------------------------EJERCICIO 8---------------------------------------------------------------------------------------------------------------------------------------
+
+        mainPanel.add(new ReservasConfirmadasPanel(this), "ReservasConfirmadasPanel");
+
+        //---------------------------------------EJERCICIO 9---------------------------------------------------------------------------------------------------------------------------------------
+
+        mainPanel.add(new ReservasPorHuespedPanel(this), "ReservasPorHuespedPanel");
 
         add(mainPanel);
         setTitle("Administrador de Hoteles");
