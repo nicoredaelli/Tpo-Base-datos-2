@@ -36,7 +36,7 @@ public class MenuPanel extends JPanel {
                 case "Consulta de Información de Hotel":
                     mainFrame.showPanel("xxxx"); // Este nombre debe coincidir con el panel agregado
                     break;
-                // Agrega más casos según los botones restantes
+                
                 default:
                     System.out.println("Botón no implementado: " + command);
                     break;

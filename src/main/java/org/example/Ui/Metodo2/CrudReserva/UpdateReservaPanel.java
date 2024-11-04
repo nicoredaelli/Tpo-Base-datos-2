@@ -13,6 +13,11 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.List;
 
+import javax.swing.*;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.List;
+
 public class UpdateReservaPanel extends JPanel {
     private JTextField codReservaField, checkinField, checkoutField, tarifaField;
     private JComboBox<Integer> idHotelComboBox, idHabitacionComboBox, idHuespedComboBox;

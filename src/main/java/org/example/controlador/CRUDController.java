@@ -686,7 +686,32 @@ public Habitacion readHabitacion(int idHabitacion) {
     }
 
 
+    public List<Habitacion> getHabitacionesDisponibles() {
+        List<Habitacion> habitaciones = new ArrayList<>();
 
+        // Conectar a la colección de habitaciones
+        MongoCollection<Document> collection = mongoDB.getCollection("habitaciones");
+
+        try (MongoCursor<Document> cursor = collection.find().iterator()) {
+            while (cursor.hasNext()) {
+                Document doc = cursor.next();
+                int idHabitacion = doc.getInteger("idHabitacion"); // Obtener el ID de la habitación
+                int nroHabitacion = doc.getInteger("nroHabitacion");
+                int idHotel = doc.getInteger("idHotel");
+                String tipoHabitacion = doc.getString("tipoHabitacion");
+                List<Integer> amenities = (List<Integer>) doc.get("amenities");
+
+                // Crear un objeto Habitacion y agregarlo a la lista
+                Habitacion habitacion = new Habitacion(idHabitacion, nroHabitacion, idHotel, tipoHabitacion, amenities);
+                habitaciones.add(habitacion);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            // Manejo de errores, puedes lanzar una excepción o retornar una lista vacía
+        }
+
+        return habitaciones;
+    }
 
 
     //------------------------------------------------------------------------------------------------------------------------------------
@@ -1176,6 +1201,9 @@ public List<Zona> getZonasDisponibles() {
     public void aumentarUltimoIDZona() {
         mongoDB.getCollection("contadores").updateOne(new Document("_id", "id_zona"), new Document("$inc", new Document("seq", 1)));
     }
+
+    
+    
 
 
 
