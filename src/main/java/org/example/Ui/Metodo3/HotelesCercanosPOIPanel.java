@@ -12,6 +12,7 @@ public class HotelesCercanosPOIPanel extends JPanel {
     private MainFrame mainFrame;
     private DatabaseQueryController dbController;
     private JComboBox<PuntoDeInteres> poiComboBox;
+    private JTextArea hotelesTextArea;
 
     public HotelesCercanosPOIPanel(MainFrame mainFrame) {
         this.mainFrame = mainFrame;
@@ -41,25 +42,17 @@ public class HotelesCercanosPOIPanel extends JPanel {
         inputPanel.add(backButton);
 
         add(inputPanel, BorderLayout.NORTH);
+
+        hotelesTextArea = new JTextArea(10, 30);
+        hotelesTextArea.setEditable(false);
+        add(new JScrollPane(hotelesTextArea), BorderLayout.CENTER);
     }
 
     private void displayHoteles(List<Hotel> hoteles) {
-        removeAll(); // Elimina todos los componentes del panel antes de agregar los nuevos resultados.
-    
-        JPanel hotelesPanel = new JPanel();
-        hotelesPanel.setLayout(new BoxLayout(hotelesPanel, BoxLayout.Y_AXIS));
-    
-        if (hoteles.isEmpty()) {
-            hotelesPanel.add(new JLabel("No se encontraron hoteles cercanos."));
-        } else {
-            for (Hotel hotel : hoteles) {
-                hotelesPanel.add(new JLabel(hotel.getNombre()));
-            }
+        StringBuilder hotelesInfo = new StringBuilder();
+        for (Hotel hotel : hoteles) {
+            hotelesInfo.append(hotel.getNombre()).append("\n");
         }
-    
-        add(new JScrollPane(hotelesPanel), BorderLayout.CENTER);
-        revalidate();
-        repaint();
+        hotelesTextArea.setText(hotelesInfo.toString());
     }
-    
 }
