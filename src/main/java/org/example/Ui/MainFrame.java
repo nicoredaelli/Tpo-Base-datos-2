@@ -7,6 +7,8 @@ import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
 
 
+import org.example.Ui.Metodo10.ReservasPorFechaPanel;
+import org.example.Ui.Metodo11.DetallesHuespedPanel;
 import org.example.Ui.Metodo2.*;
 import org.example.Ui.Metodo2.CrudHuesped.*;
 import org.example.Ui.Metodo2.CrudReserva.*;
@@ -18,6 +20,10 @@ import org.example.Ui.Metodo1.CrudAmenitie.*;
 import org.example.Ui.Metodo1.CrudHabitaciones.*;
 import org.example.Ui.Metodo1.CrudHotel.*;
 import org.example.Ui.Metodo1.CrudPOI.*;
+import org.example.Ui.Metodo4.InfoHotelPanel;
+import org.example.Ui.Metodo6.BuscarHabitacionDisponiblePanel;
+import org.example.Ui.Metodo8.ReservasConfirmadasPanel;
+import org.example.Ui.Metodo9.ReservasPorHuespedPanel;
 
 import java.awt.CardLayout;
 
@@ -76,9 +82,35 @@ public class MainFrame extends JFrame {
         mainPanel.add(new UpdateHuespedPanel(this), "UpdateHuespedPanel");
         mainPanel.add(new DeleteHuespedPanel(this), "DeleteHuespedPanel");
 
+
+        //---------------------------------------EJERCICIO 4 ---------------------------------------------------------------------------------------------------------------------------------------
+
+        mainPanel.add(new InfoHotelPanel(this), "InfoHotelPanel");
+
+        //---------------------------------------EJERCICIO 6 ---------------------------------------------------------------------------------------------------------------------------------------
+
+        mainPanel.add(new BuscarHabitacionDisponiblePanel(this), "BuscarHabitacionDisponiblePanel");
+
+        //---------------------------------------EJERCICIO 8 ---------------------------------------------------------------------------------------------------------------------------------------
+
+        mainPanel.add(new ReservasConfirmadasPanel(this), "ReservasConfirmadasPanel");
+
+        //---------------------------------------EJERCICIO 9 ---------------------------------------------------------------------------------------------------------------------------------------
+
+        mainPanel.add(new ReservasPorHuespedPanel(this), "ReservasPorHuespedPanel");
+
+        //---------------------------------------EJERCICIO 10 ---------------------------------------------------------------------------------------------------------------------------------------
+
+        mainPanel.add(new ReservasPorFechaPanel(this), "ReservasPorFechaPanel");
+
+        //---------------------------------------EJERCICIO 11 ---------------------------------------------------------------------------------------------------------------------------------------
+
+        mainPanel.add(new DetallesHuespedPanel(this), "DetallesHuespedPanel");
+
         mainPanel.add(new HotelesCercanosPOIPanel(this), "HotelesCercanosPOI");
         mainPanel.add(new PuntosInteresCercanosHotelPanel(this), "PuntosInteresCercanosHotel");
         mainPanel.add(new AmenitiesHabitacionPanel(this), "AmenitiesHabitacion");
+
 
         add(mainPanel);
         setTitle("Administrador de Hoteles");

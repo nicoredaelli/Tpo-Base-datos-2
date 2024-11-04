@@ -70,12 +70,12 @@ public class HotelCrudTest {
         int nuevaZona = 4;
 
         // Llamada al metodo para actualizar los datos del hotel
-        crudController.updateHotel(idHotel, nuevoNombre, nuevoTelefono, nuevaDireccion, nuevoEmail, nuevaZona);
+        crudController.updateHotel(idHotel, nuevoNombre, nuevoTelefono, nuevaDireccion, nuevoEmail, habitaciones, nuevaZona);
 
         System.out.println("Hotel actualizado con éxito.");
 
         // Leer el hotel de MongoDB para verificar que se actualizo correctamente
-        Hotel hotelActualizado = crudController.readHotel(idHotel);
+        Hotel hotelActualizado = crudController.    readHotel(idHotel);
 
         if (hotelActualizado != null) {
             System.out.println("Hotel actualizado recuperado de MongoDB: " + hotelActualizado);

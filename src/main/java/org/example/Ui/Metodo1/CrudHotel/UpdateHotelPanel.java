@@ -157,7 +157,15 @@ public class UpdateHotelPanel extends JPanel {
             direccion.put("pais", country);
 
             // Actualizar el hotel
+
+
+            Hotel hotel = crudController.readHotel(id);
+
+            crudController.updateHotel(id, name, phone, direccion, email, hotel.getHabitaciones(), zone);
+            
+
             crudController.updateHotel(idHotel, name, phone, direccion, email, zoneId); // Pasar el ID del hotel
+
             JOptionPane.showMessageDialog(this, "Hotel actualizado exitosamente.");
         } catch (Exception e) {
             JOptionPane.showMessageDialog(this, "Por favor, ingrese valores válidos.", "Error", JOptionPane.ERROR_MESSAGE);

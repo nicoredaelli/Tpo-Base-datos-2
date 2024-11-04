@@ -33,6 +33,27 @@ public class MenuPanel extends JPanel {
                 case "Gestión de Huéspedes y Reservas":
                     mainFrame.showPanel("GestiónHR"); // Este nombre debe coincidir con el panel agregado
                     break;
+
+                case "Consulta de Información de Hotel":
+                    mainFrame.showPanel("InfoHotelPanel"); // Este nombre debe coincidir con el panel agregado
+                    break;
+                case "Disponibilidad de Habitaciones por Rango de Fechas":
+                    mainFrame.showPanel("BuscarHabitacionDisponiblePanel"); // Este nombre debe coincidir con el panel agregado
+                    break;
+                case "Búsqueda de Reservas por Número de Confirmación":
+                    mainFrame.showPanel("ReservasConfirmadasPanel"); // Este nombre debe coincidir con el panel agregado
+                    break;
+                case "Reservas por Huésped":
+                    mainFrame.showPanel("ReservasPorHuespedPanel"); // Este nombre debe coincidir con el panel agregado
+                    break;
+                case "Detalles del Huésped":
+                    mainFrame.showPanel("DetallesHuespedPanel"); // Este nombre debe coincidir con el panel agregado
+                    break;
+                case "Reservas por Fecha en el Hotel":
+                    mainFrame.showPanel("ReservasPorFechaPanel"); // Este nombre debe coincidir con el panel agregado
+                    break;
+                // Agrega más casos según los botones restantes
+
                 case "Hoteles Cercanos a Puntos de Interés":
                     mainFrame.showPanel("HotelesCercanosPOI");
                     break;
@@ -47,6 +68,7 @@ public class MenuPanel extends JPanel {
                     mainFrame.showPanel("xxxx"); // Este nombre debe coincidir con el panel agregado
                     break;
                 
+
                 default:
                     System.out.println("Botón no implementado: " + command);
                     break;

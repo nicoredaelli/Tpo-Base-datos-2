@@ -47,6 +47,34 @@ public class Hotel {
         return zona;
     }
 
+    public void setIdHotel(int idHotel) {
+        this.idHotel = idHotel;
+    }
+
+    public void setNombre(String nombre) {
+        this.nombre = nombre;
+    }
+
+    public void setTelefono(String telefono) {
+        this.telefono = telefono;
+    }
+
+    public void setEmail(String email) {
+        this.email = email;
+    }
+
+    public void setDireccion(Map<String, String> direccion) {
+        this.direccion = direccion;
+    }
+
+    public void setHabitaciones(List<Integer> habitaciones) {
+        this.habitaciones = habitaciones;
+    }
+
+    public void setZona(int zona) {
+        this.zona = zona;
+    }
+
     @Override
     public String toString() {
         return "Hotel{" +
@@ -71,5 +99,9 @@ public class Hotel {
         this.habitaciones = habitaciones;
         this.zona = zona;
     }
-    
+
+    public Hotel() {
+
+    }
+
 }
