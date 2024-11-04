@@ -28,7 +28,7 @@ import org.example.controlador.CRUDController;
 import org.example.entidades.Habitacion;
 
 public class UpdateRoomPanel extends JPanel {
-    private JTextField roomNumberField, roomTypeField, amenitiesField;
+    private JTextField idRoomField, roomNumberField, roomTypeField, amenitiesField;
     private JComboBox<String> hotelDropdown;
     private CRUDController crudController;
 
@@ -37,6 +37,7 @@ public class UpdateRoomPanel extends JPanel {
 
         setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
 
+        idRoomField = new JTextField(10);
         roomNumberField = new JTextField(10);
         hotelDropdown = new JComboBox<>();
         roomTypeField = new JTextField(20);
@@ -48,6 +49,8 @@ public class UpdateRoomPanel extends JPanel {
             hotelDropdown.addItem(hotel.getIdHotel() + " - " + hotel.getNombre());
         }
 
+        add(new JLabel("ID de Habitación:"));
+        add(idRoomField);
         add(new JLabel("Número de Habitación:"));
         add(roomNumberField);
         add(new JLabel("Hotel:"));
@@ -73,13 +76,14 @@ public class UpdateRoomPanel extends JPanel {
 
     private void loadRoomData() {
         try {
-            int roomNumber = Integer.parseInt(roomNumberField.getText());
+            int idRoom = Integer.parseInt(idRoomField.getText());
             String selectedHotel = (String) hotelDropdown.getSelectedItem();
             int hotelId = Integer.parseInt(selectedHotel.split(" - ")[0]);
 
-            Habitacion habitacion = crudController.readHabitacion(roomNumber);
+            Habitacion habitacion = crudController.readHabitacion(idRoom);
 
             if (habitacion != null) {
+                roomNumberField.setText(String.valueOf(habitacion.getNroHabitacion()));
                 roomTypeField.setText(habitacion.getTipoHabitacion());
                 amenitiesField.setText(habitacion.getAmenities().toString().replaceAll("[\\[\\] ]", ""));
             } else {
@@ -92,6 +96,7 @@ public class UpdateRoomPanel extends JPanel {
 
     private void updateRoom() {
         try {
+            int idRoom = Integer.parseInt(idRoomField.getText());
             int roomNumber = Integer.parseInt(roomNumberField.getText());
             String selectedHotel = (String) hotelDropdown.getSelectedItem();
             int hotelId = Integer.parseInt(selectedHotel.split(" - ")[0]);
@@ -105,7 +110,7 @@ public class UpdateRoomPanel extends JPanel {
                         .toList();
             }
 
-            Habitacion habitacionActualizada = new Habitacion(roomNumber, hotelId, roomType, amenities);
+            Habitacion habitacionActualizada = new Habitacion(idRoom, roomNumber, hotelId, roomType, amenities);
             crudController.updateHabitacion(habitacionActualizada);
 
             JOptionPane.showMessageDialog(this, "Habitación actualizada exitosamente.");

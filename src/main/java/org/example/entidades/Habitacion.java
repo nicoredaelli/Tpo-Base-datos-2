@@ -5,6 +5,7 @@ import java.util.List;
 import org.bson.types.ObjectId;
 
 public class Habitacion {
+    private int idHabitacion;
     private int nroHabitacion;
     private int idHotel;
     private String tipoHabitacion;
@@ -42,10 +43,15 @@ public class Habitacion {
         this.amenities = amenities;
     }
 
+    public int getIdHabitacion() {
+        return idHabitacion;
+    }
+
     @Override
     public String toString() {
         return "Habitacion{" +
-                "nroHabitacion=" + nroHabitacion +
+                "idHabitacion=" + idHabitacion +
+                ", nroHabitacion=" + nroHabitacion +
                 ", idHotel=" + idHotel +
                 ", tipoHabitacion='" + tipoHabitacion + '\'' +
                 ", amenities=" + amenities +
@@ -53,7 +59,8 @@ public class Habitacion {
     }
 
     // Constructor
-    public Habitacion(int nroHabitacion, int idHotel, String tipoHabitacion, List<Integer> amenities) {
+    public Habitacion(int idHabitacion, int nroHabitacion, int idHotel, String tipoHabitacion, List<Integer> amenities) {
+        this.idHabitacion = idHabitacion;
         this.nroHabitacion = nroHabitacion;
         this.idHotel = idHotel;
         this.tipoHabitacion = tipoHabitacion;
