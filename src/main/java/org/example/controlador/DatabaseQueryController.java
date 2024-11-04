@@ -367,5 +367,22 @@ public class DatabaseQueryController {
         return habitaciones;
     }
 
+    public int getAmenityIdByName(String nombre) {
+        // Acceder a la colección de amenities en MongoDB
+        MongoCollection<Document> collection = mongoDB.getCollection("amenities");
+
+        // Buscar el documento que tenga el nombre especificado
+        Document doc = collection.find(Filters.eq("nombre", nombre)).first();
+
+        // Verificar si el documento fue encontrado
+        if (doc != null) {
+            return doc.getInteger("id_amenity"); // Devuelve el ID del amenity
+        } else {
+            System.err.println("Amenity con nombre '" + nombre + "' no encontrado.");
+            return -1; // Indica que el amenity no fue encontrado
+        }
+    }
+
+
 }
 

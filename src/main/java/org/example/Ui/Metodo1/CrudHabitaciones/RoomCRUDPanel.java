@@ -11,19 +11,14 @@ public class RoomCRUDPanel extends JPanel {
         btnCreate.addActionListener(e -> mainFrame.showPanel("CreateRoomPanel")); 
 
         JButton btnUpdate = new JButton("Modificar");
-        btnUpdate.addActionListener(e -> mainFrame.showPanel("UpdateRoomPanel")); 
+        btnUpdate.addActionListener(e -> mainFrame.showPanel("UpdateRoomHotelSelectionPanel"));
 
-        
         JButton btnRead = new JButton("Leer");
-        btnRead.addActionListener(e -> mainFrame.showPanel("ReadRoomPanel")); // Cambiar al panel de eliminación
-
+        btnRead.addActionListener(e -> mainFrame.showPanel("RoomSelectionPanel")); // Cambiar al panel de seleccion y luego lectura
 
         JButton btnDelete = new JButton("Eliminar");
-        btnDelete.addActionListener(e -> mainFrame.showPanel("DeleteRoomPanel")); // Cambiar al panel de eliminación
+        btnDelete.addActionListener(e -> mainFrame.showPanel("DeleteRoomHotelSelectionPanel")); // Cambiar al panel de eliminación
 
-
-
-        
         JButton backButton = new JButton("Regresar");
         backButton.addActionListener(e -> mainFrame.showPanel("GestiónHHAP")); // Cambiar a "GestiónHHAP" si es necesario
 

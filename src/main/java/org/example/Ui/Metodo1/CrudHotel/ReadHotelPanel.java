@@ -6,15 +6,8 @@ import java.util.List;
 import org.example.Ui.MainFrame;
 import org.example.controlador.CRUDController;
 import org.example.entidades.Hotel;
-import org.example.entidades.Zona;
 
 import javax.swing.*;
-
-
-
-import javax.swing.*;
-import java.awt.*;
-import java.util.List;
 
 public class ReadHotelPanel extends JPanel {
     
@@ -27,7 +20,7 @@ public class ReadHotelPanel extends JPanel {
         setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
 
         // Obtener la lista de hoteles disponibles desde el CRUDController
-        hotelesDisponibles = crudController.getHotelesDisponibles();
+        hotelesDisponibles = crudController.getAllHoteles();
 
         // Crear el cuadro desplegable con los nombres de los hoteles
         hotelDropdown = new JComboBox<>(hotelesDisponibles.stream()

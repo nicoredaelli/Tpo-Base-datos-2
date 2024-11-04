@@ -81,17 +81,17 @@ public class CreateReservaPanel extends JPanel {
 
     // Métodos para obtener los IDs desde el CRUDController
     private Integer[] getHotelIds() {
-        List<Hotel> hoteles = crudController.getHotelesDisponibles();
+        List<Hotel> hoteles = crudController.getAllHoteles();
         return hoteles.stream().map(Hotel::getIdHotel).toArray(Integer[]::new);
     }
 
     private Integer[] getHabitacionIds() {
-        List<Habitacion> habitaciones = crudController.getHabitacionesDisponibles();
+        List<Habitacion> habitaciones = crudController.getAllHabitaciones();
         return habitaciones.stream().map(Habitacion::getNroHabitacion).toArray(Integer[]::new);
     }
 
     private Integer[] getHuespedIds() {
-        List<Huesped> huespedes = crudController.getHuespedesDisponibles();
+        List<Huesped> huespedes = crudController.getAllHuespedes();
         return huespedes.stream().map(Huesped::getIdHuesped).toArray(Integer[]::new);
     }
 }

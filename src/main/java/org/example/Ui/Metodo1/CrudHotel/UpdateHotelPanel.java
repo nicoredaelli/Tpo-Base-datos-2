@@ -25,7 +25,7 @@ public class UpdateHotelPanel extends JPanel {
         setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
 
         // Obtener la lista de hoteles disponibles desde el CRUDController
-        List<Hotel> hotelesDisponibles = crudController.getHotelesDisponibles();
+        List<Hotel> hotelesDisponibles = crudController.getAllHoteles();
         String[] hotelNames = hotelesDisponibles.stream().map(Hotel::getNombre).toArray(String[]::new);
 
         // Crear el JComboBox para seleccionar el hotel
@@ -89,10 +89,10 @@ public class UpdateHotelPanel extends JPanel {
 
     private void loadHotelData() {
         String selectedHotelName = (String) hotelDropdown.getSelectedItem();
-        Hotel hotel = crudController.getHotelesDisponibles().stream()
-            .filter(h -> h.getNombre().equals(selectedHotelName))
-            .findFirst()
-            .orElse(null);
+        Hotel hotel = crudController.getAllHoteles().stream()
+                .filter(h -> h.getNombre().equals(selectedHotelName))
+                .findFirst()
+                .orElse(null);
 
         if (hotel != null) {
             nameField.setText(hotel.getNombre());
@@ -109,10 +109,10 @@ public class UpdateHotelPanel extends JPanel {
             // Obtener el ID de la zona seleccionada
             int zonaId = hotel.getZona();
             String zonaNombre = crudController.getZonasDisponibles().stream()
-                .filter(z -> z.getIdZona() == zonaId)
-                .map(Zona::getNombre)
-                .findFirst()
-                .orElse("");
+                    .filter(z -> z.getIdZona() == zonaId)
+                    .map(Zona::getNombre)
+                    .findFirst()
+                    .orElse("");
             zoneDropdown.setSelectedItem(zonaNombre);
         } else {
             JOptionPane.showMessageDialog(this, "Hotel no encontrado.");
@@ -122,10 +122,10 @@ public class UpdateHotelPanel extends JPanel {
     private void actualizarHotel() {
         try {
             String selectedHotelName = (String) hotelDropdown.getSelectedItem();
-            Hotel hotel = crudController.getHotelesDisponibles().stream()
-                .filter(h -> h.getNombre().equals(selectedHotelName))
-                .findFirst()
-                .orElse(null);
+            Hotel hotel = crudController.getAllHoteles().stream()
+                    .filter(h -> h.getNombre().equals(selectedHotelName))
+                    .findFirst()
+                    .orElse(null);
 
             if (hotel == null) {
                 JOptionPane.showMessageDialog(this, "Seleccione un hotel válido.", "Error", JOptionPane.ERROR_MESSAGE);
@@ -143,10 +143,10 @@ public class UpdateHotelPanel extends JPanel {
             String country = countryField.getText();
             String selectedZone = (String) zoneDropdown.getSelectedItem();
             int zoneId = crudController.getZonasDisponibles().stream()
-                .filter(z -> z.getNombre().equals(selectedZone))
-                .map(Zona::getIdZona)
-                .findFirst()
-                .orElse(-1); // Manejar caso donde no se encuentra la zona
+                    .filter(z -> z.getNombre().equals(selectedZone))
+                    .map(Zona::getIdZona)
+                    .findFirst()
+                    .orElse(-1); // Manejar caso donde no se encuentra la zona
 
             // Crear una dirección ficticia para el hotel
             Map<String, String> direccion = new HashMap<>();
@@ -157,15 +157,7 @@ public class UpdateHotelPanel extends JPanel {
             direccion.put("pais", country);
 
             // Actualizar el hotel
-
-
-            Hotel hotel = crudController.readHotel(id);
-
-            crudController.updateHotel(id, name, phone, direccion, email, hotel.getHabitaciones(), zone);
-            
-
-            crudController.updateHotel(idHotel, name, phone, direccion, email, zoneId); // Pasar el ID del hotel
-
+            crudController.updateHotel(idHotel, name, phone, direccion, email, hotel.getHabitaciones(), zoneId); // Pasar el ID del hotel
             JOptionPane.showMessageDialog(this, "Hotel actualizado exitosamente.");
         } catch (Exception e) {
             JOptionPane.showMessageDialog(this, "Por favor, ingrese valores válidos.", "Error", JOptionPane.ERROR_MESSAGE);
@@ -182,7 +174,7 @@ public class UpdateHotelPanel extends JPanel {
         postalCodeField.setText("");
         provinceField.setText("");
         countryField.setText("");
-        
+
     }
 }
 

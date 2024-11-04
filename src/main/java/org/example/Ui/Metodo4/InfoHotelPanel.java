@@ -73,7 +73,7 @@ public class InfoHotelPanel extends JPanel {
 
     // Método para cargar los hoteles disponibles en el JComboBox
     private void loadHotelsIntoDropdown() {
-        List<Hotel> hotelesDisponibles = crudController.getHotelesDisponibles();
+        List<Hotel> hotelesDisponibles = crudController.getAllHoteles();
         if (hotelesDisponibles != null && !hotelesDisponibles.isEmpty()) {
             for (Hotel hotel : hotelesDisponibles) {
                 hotelDropdown.addItem(hotel.getIdHotel() + " - " + hotel.getNombre());

@@ -11,19 +11,7 @@ import org.example.entidades.Huesped;
 
 import java.util.List;
 
-import javax.swing.*;
 import java.awt.*;
-import java.util.List;
-
-import javax.swing.*;
-import java.awt.*;
-import java.util.List;
-import javax.swing.*;
-import java.awt.*;
-import java.util.List;
-import javax.swing.*;
-import java.awt.*;
-import java.util.List;
 
 public class ReadHuespedPanel extends JPanel {
     private JComboBox<String> huespedDropdown; // Menú desplegable para seleccionar huésped
@@ -35,7 +23,7 @@ public class ReadHuespedPanel extends JPanel {
         setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
 
         // Obtener la lista de huéspedes disponibles desde el CRUDController
-        List<Huesped> huespedesDisponibles = crudController.getHuespedesDisponibles();
+        List<Huesped> huespedesDisponibles = crudController.getAllHuespedes();
         String[] huespedNames = huespedesDisponibles.stream()
             .map(h -> h.getNombre() + " " + h.getApellido())
             .toArray(String[]::new);
@@ -74,7 +62,7 @@ public class ReadHuespedPanel extends JPanel {
             String apellido = parts[1];
 
             // Buscar el huésped correspondiente
-            Huesped huesped = crudController.getHuespedesDisponibles().stream()
+            Huesped huesped = crudController.getAllHuespedes().stream()
                 .filter(h -> h.getNombre().equals(nombre) && h.getApellido().equals(apellido))
                 .findFirst()
                 .orElse(null);

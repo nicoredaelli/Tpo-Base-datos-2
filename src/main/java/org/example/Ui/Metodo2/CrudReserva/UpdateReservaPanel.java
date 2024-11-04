@@ -1,21 +1,12 @@
 package org.example.Ui.Metodo2.CrudReserva;
 
 import javax.swing.*;
-import java.awt.*;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import org.example.Ui.MainFrame;
 import org.example.controlador.CRUDController;
 import org.example.entidades.*;
 
-import javax.swing.*;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.List;
-
-import javax.swing.*;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.List;
 
 public class UpdateReservaPanel extends JPanel {
@@ -117,17 +108,17 @@ public class UpdateReservaPanel extends JPanel {
 
     // Métodos para obtener los IDs desde el CRUDController
     private Integer[] getHotelIds() {
-        List<Hotel> hoteles = crudController.getHotelesDisponibles();
+        List<Hotel> hoteles = crudController.getAllHoteles();
         return hoteles.stream().map(Hotel::getIdHotel).toArray(Integer[]::new);
     }
 
     private Integer[] getHabitacionIds() {
-        List<Habitacion> habitaciones = crudController.getHabitacionesDisponibles();
+        List<Habitacion> habitaciones = crudController.getAllHabitaciones();
         return habitaciones.stream().map(Habitacion::getNroHabitacion).toArray(Integer[]::new);
     }
 
     private Integer[] getHuespedIds() {
-        List<Huesped> huespedes = crudController.getHuespedesDisponibles();
+        List<Huesped> huespedes = crudController.getAllHuespedes();
         return huespedes.stream().map(Huesped::getIdHuesped).toArray(Integer[]::new);
     }
 }

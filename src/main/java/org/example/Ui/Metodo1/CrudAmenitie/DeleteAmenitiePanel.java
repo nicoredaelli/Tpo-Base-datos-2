@@ -7,10 +7,6 @@ import org.example.Ui.MainFrame;
 import org.example.controlador.CRUDController;
 import org.example.entidades.Amenity;
 
-import javax.swing.*;
-import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.util.List;
 
 public class DeleteAmenitiePanel extends JPanel {
@@ -28,7 +24,7 @@ public class DeleteAmenitiePanel extends JPanel {
         JLabel selectLabel = new JLabel("Selecciona el Amenity a Eliminar:");
         
         // Obtener la lista de amenities y llenar el combo box
-        List<Amenity> amenities = crudController.getAmenitiesDisponibles();
+        List<Amenity> amenities = crudController.getAllAmenities();
         String[] amenityNames = amenities.stream().map(Amenity::getNombre).toArray(String[]::new);
         
         amenityComboBox = new JComboBox<>(amenityNames); // Crear el combo box con los nombres de amenities

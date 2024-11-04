@@ -1,20 +1,13 @@
 package org.example.Ui.Metodo1.CrudHotel;
 
 import java.awt.Dimension;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
-import org.bson.types.ObjectId;
 import org.example.Ui.MainFrame;
 import org.example.controlador.CRUDController;
 import org.example.entidades.Hotel;
 
 import javax.swing.*;
-import java.awt.*;
-import java.util.List;
 
 public class DeleteHotelPanel extends JPanel {
     private JComboBox<String> hotelDropdown; // Cuadro desplegable para seleccionar el hotel
@@ -24,7 +17,7 @@ public class DeleteHotelPanel extends JPanel {
         setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
 
         // Obtener la lista de hoteles disponibles desde el CRUDController
-        List<Hotel> hotelesDisponibles = crudController.getHotelesDisponibles();
+        List<Hotel> hotelesDisponibles = crudController.getAllHoteles();
         String[] hotelNames = hotelesDisponibles.stream().map(Hotel::getNombre).toArray(String[]::new);
 
         // Crear el JComboBox para seleccionar el hotel
@@ -46,7 +39,7 @@ public class DeleteHotelPanel extends JPanel {
     private void eliminarHotel() {
         try {
             String selectedHotelName = (String) hotelDropdown.getSelectedItem();
-            Hotel hotel = crudController.getHotelesDisponibles().stream()
+            Hotel hotel = crudController.getAllHoteles().stream()
                 .filter(h -> h.getNombre().equals(selectedHotelName))
                 .findFirst()
                 .orElse(null);

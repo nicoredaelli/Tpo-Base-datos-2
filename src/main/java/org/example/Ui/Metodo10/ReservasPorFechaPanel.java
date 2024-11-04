@@ -59,7 +59,7 @@ public class ReservasPorFechaPanel extends JPanel {
 
     // Metodo para cargar la lista de hoteles en el JComboBox
     private void loadHotelsIntoDropdown() {
-        List<Hotel> hotelesDisponibles = crudController.getHotelesDisponibles();
+        List<Hotel> hotelesDisponibles = crudController.getAllHoteles();
         if (hotelesDisponibles != null && !hotelesDisponibles.isEmpty()) {
             for (Hotel hotel : hotelesDisponibles) {
                 hotelDropdown.addItem(hotel.getIdHotel() + " - " + hotel.getNombre());

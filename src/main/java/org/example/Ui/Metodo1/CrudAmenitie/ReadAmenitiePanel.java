@@ -8,8 +8,6 @@ import org.example.controlador.CRUDController;
 import org.example.entidades.Amenity;
 import java.awt.Dimension;
 
-import javax.swing.*;
-import java.awt.*;
 import java.util.List;
 
 public class ReadAmenitiePanel extends JPanel {
@@ -22,7 +20,7 @@ public class ReadAmenitiePanel extends JPanel {
         setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
 
         // Obtener la lista de amenities disponibles desde el CRUDController
-        List<Amenity> amenitiesDisponibles = crudController.getAmenitiesDisponibles();
+        List<Amenity> amenitiesDisponibles = crudController.getAllAmenities();
         String[] amenityNames = amenitiesDisponibles.stream().map(Amenity::getNombre).toArray(String[]::new);
 
         // Crear el JComboBox para seleccionar el amenity
@@ -53,7 +51,7 @@ public class ReadAmenitiePanel extends JPanel {
     private void readAmenity() {
         try {
             String selectedAmenityName = (String) amenityDropdown.getSelectedItem();
-            Amenity amenity = crudController.getAmenitiesDisponibles().stream()
+            Amenity amenity = crudController.getAllAmenities().stream()
                 .filter(a -> a.getNombre().equals(selectedAmenityName))
                 .findFirst()
                 .orElse(null);

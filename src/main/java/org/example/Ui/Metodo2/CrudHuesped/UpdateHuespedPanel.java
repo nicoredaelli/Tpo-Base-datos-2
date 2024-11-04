@@ -1,24 +1,12 @@
 package org.example.Ui.Metodo2.CrudHuesped;
 
 import javax.swing.*;
-import java.awt.*;
-import java.util.HashMap;
 import java.util.Map;
 import org.example.Ui.MainFrame;
 import org.example.controlador.CRUDController;
 import org.example.entidades.Huesped;
 
-import javax.swing.*;
-import java.awt.*;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
-
-import javax.swing.*;
-import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.util.List;
-import java.util.Map;
 
 public class UpdateHuespedPanel extends JPanel {
     private JComboBox<String> huespedComboBox; // Menú desplegable para seleccionar huésped
@@ -79,7 +67,7 @@ public class UpdateHuespedPanel extends JPanel {
     }
 
     private void loadHuespedesDisponibles() {
-        List<Huesped> huespedes = crudController.getHuespedesDisponibles();
+        List<Huesped> huespedes = crudController.getAllHuespedes();
         for (Huesped huesped : huespedes) {
             huespedComboBox.addItem(huesped.getNombre() + " " + huesped.getApellido());
         }

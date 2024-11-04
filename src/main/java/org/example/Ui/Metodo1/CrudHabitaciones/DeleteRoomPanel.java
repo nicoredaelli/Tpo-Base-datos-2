@@ -1,65 +1,100 @@
 package org.example.Ui.Metodo1.CrudHabitaciones;
+
+import javax.swing.*;
+import java.awt.event.ActionEvent;
 import java.util.List;
-
-import javax.swing.BoxLayout;
-import javax.swing.JButton;
-import javax.swing.JComboBox;
-import javax.swing.JLabel;
-import javax.swing.JOptionPane;
-import javax.swing.JPanel;
-import javax.swing.JTextField;
-
 import org.example.Ui.MainFrame;
 import org.example.controlador.CRUDController;
-import org.example.entidades.Hotel;
-//lo mismo agregarle el id del hotel 
+import org.example.entidades.Amenity;
+import org.example.entidades.Habitacion;
+
 public class DeleteRoomPanel extends JPanel {
-    private JTextField idRoomField;
-    private JComboBox<String> hotelDropdown;
+    private JComboBox<String> roomDropdown;
+    private JTextArea roomDetailsArea;
+    private MainFrame mainFrame;
     private CRUDController crudController;
+    private int hotelId;
 
     public DeleteRoomPanel(MainFrame mainFrame) {
-        crudController = new CRUDController();
+        this.mainFrame = mainFrame;
+        this.crudController = new CRUDController();
 
         setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
 
-        idRoomField = new JTextField(10);
-        hotelDropdown = new JComboBox<>();
+        roomDropdown = new JComboBox<>();
 
-        // Cargar hoteles en el JComboBox
-        List<Hotel> hotelesDisponibles = crudController.getHotelesDisponibles();
-        for (Hotel hotel : hotelesDisponibles) {
-            hotelDropdown.addItem(hotel.getIdHotel() + " - " + hotel.getNombre()); // Muestra ID y nombre
-        }
-
-        add(new JLabel("Id de Habitación:"));
-        add(idRoomField);
-        add(new JLabel("Hotel:"));
-        add(hotelDropdown);
-
-        JButton deleteButton = new JButton("Eliminar");
+        JButton deleteButton = new JButton("Eliminar Habitación");
         deleteButton.addActionListener(e -> deleteRoom());
 
         JButton backButton = new JButton("Regresar");
-        backButton.addActionListener(e -> mainFrame.showPanel("RoomCRUDPanel"));
+        backButton.addActionListener(e -> mainFrame.showPanel("DeleteRoomHotelSelectionPanel"));
 
+        JButton showDetailsButton = new JButton("Mostrar Detalles");
+        showDetailsButton.addActionListener(e -> showRoomDetails());
+
+        roomDetailsArea = new JTextArea(5, 30);
+        roomDetailsArea.setEditable(false); // El área de detalles solo mostrará información
+
+        add(new JLabel("Seleccione una habitación:"));
+        add(roomDropdown);
+        add(showDetailsButton);
+        add(new JScrollPane(roomDetailsArea)); // Agregar el JTextArea en un JScrollPane
         add(deleteButton);
         add(backButton);
     }
 
+    // Método para cargar las habitaciones del hotel seleccionado
+    public void loadRooms(int hotelId) {
+        this.hotelId = hotelId; // Almacena el hotelId
+        roomDropdown.removeAllItems(); // Limpiar el JComboBox
+
+        List<Habitacion> habitaciones = crudController.getRoomsByHotelId(hotelId);
+        for (Habitacion habitacion : habitaciones) {
+            roomDropdown.addItem(habitacion.getIdHabitacion() + " - " + habitacion.getNroHabitacion());
+        }
+        roomDetailsArea.setText(""); // Limpiar el área de detalles cuando se recargan las habitaciones
+    }
+
     private void deleteRoom() {
-        try {
-            int idRoom = Integer.parseInt(idRoomField.getText());
-            String selectedHotel = (String) hotelDropdown.getSelectedItem();
-            int hotelId = Integer.parseInt(selectedHotel.split(" - ")[0]); // Extrae el ID del hotel
+        String selectedRoom = (String) roomDropdown.getSelectedItem();
+        if (selectedRoom != null) {
+            int roomId = Integer.parseInt(selectedRoom.split(" - ")[0]);
+            crudController.deleteHabitacion(roomId); // Elimina la habitación seleccionada
+            JOptionPane.showMessageDialog(this, "Habitación eliminada.");
 
-            crudController.deleteHabitacion(idRoom);
-
-            JOptionPane.showMessageDialog(this, "Habitación eliminada exitosamente.");
-        } catch (NumberFormatException e) {
-            JOptionPane.showMessageDialog(this, "Ingrese un ID de habitación válido.", "Error", JOptionPane.ERROR_MESSAGE);
+            // Recarga las habitaciones para reflejar los cambios
+            loadRooms(hotelId);
         }
     }
-}
 
- 
+    private void showRoomDetails() {
+        String selectedRoom = (String) roomDropdown.getSelectedItem();
+        if (selectedRoom != null) {
+            int roomId = Integer.parseInt(selectedRoom.split(" - ")[0]);
+            Habitacion habitacion = crudController.readHabitacion(roomId); // Obtiene la habitación seleccionada
+
+            if (habitacion != null) {
+                StringBuilder details = new StringBuilder();
+                details.append("ID Habitación: ").append(habitacion.getIdHabitacion()).append("\n");
+                details.append("Número de Habitación: ").append(habitacion.getNroHabitacion()).append("\n");
+                details.append("Tipo de Habitación: ").append(habitacion.getTipoHabitacion()).append("\n");
+                details.append("ID Hotel: ").append(habitacion.getIdHotel()).append("\n");
+                details.append("Amenities:\n");
+
+                // Itera sobre cada amenity y obtiene sus detalles
+                for (Integer amenityId : habitacion.getAmenities()) {
+                    Amenity amenity = crudController.readAmenity(amenityId);
+                    if (amenity != null) {
+                        details.append("  - ").append(amenity.getNombre()).append(": ").append(amenity.getDescripcion()).append("\n");
+                    }
+                }
+
+                // Muestra los detalles en el JTextArea
+                roomDetailsArea.setText(details.toString());
+            } else {
+                roomDetailsArea.setText("No se encontró información de la habitación.");
+            }
+        }
+    }
+
+}

@@ -1,7 +1,6 @@
 package org.example.controlador;
 
 
-import com.mongodb.ReadPreference;
 import com.mongodb.client.FindIterable;
 
 import com.mongodb.client.MongoCollection;
@@ -19,8 +18,6 @@ import org.neo4j.driver.Session;
 
 
 import java.sql.Date;
-import java.text.SimpleDateFormat;
-import java.time.ZoneId;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -544,7 +541,7 @@ public void deleteAmenity(int idAmenity) {
         System.err.println("Error al eliminar amenity en Neo4j: " + e.getMessage());
     }
 }
-public List<Amenity> getAmenitiesDisponibles() {
+public List<Amenity> getAllAmenities() {
     List<Amenity> amenities = new ArrayList<>();
 
     try {
@@ -775,7 +772,7 @@ public void createHabitacion(Habitacion habitacion) {
     }
 
 
-    public List<Hotel> getHotelesDisponibles() {
+    public List<Hotel> getAllHoteles() {
         List<Hotel> hoteles = new ArrayList<>();
 
         try {
@@ -805,7 +802,7 @@ public void createHabitacion(Habitacion habitacion) {
     }
 
 
-    public List<Habitacion> getHabitacionesDisponibles() {
+    public List<Habitacion> getAllHabitaciones() {
         List<Habitacion> habitaciones = new ArrayList<>();
 
         // Conectar a la colección de habitaciones
@@ -814,10 +811,10 @@ public void createHabitacion(Habitacion habitacion) {
         try (MongoCursor<Document> cursor = collection.find().iterator()) {
             while (cursor.hasNext()) {
                 Document doc = cursor.next();
-                int idHabitacion = doc.getInteger("idHabitacion"); // Obtener el ID de la habitación
-                int nroHabitacion = doc.getInteger("nroHabitacion");
-                int idHotel = doc.getInteger("idHotel");
-                String tipoHabitacion = doc.getString("tipoHabitacion");
+                int idHabitacion = doc.getInteger("id_habitacion"); // Obtener el ID de la habitación
+                int nroHabitacion = doc.getInteger("nro_habitacion");
+                int idHotel = doc.getInteger("id_hotel");
+                String tipoHabitacion = doc.getString("tipo_habitacion");
                 List<Integer> amenities = (List<Integer>) doc.get("amenities");
 
                 // Crear un objeto Habitacion y agregarlo a la lista
@@ -1071,7 +1068,7 @@ public List<Reserva> getReservasDisponibles() {
     }
 
 
-    public List<Huesped> getHuespedesDisponibles() {
+    public List<Huesped> getAllHuespedes() {
         List<Huesped> huespedes = new ArrayList<>();
     
         try {
@@ -1116,7 +1113,7 @@ public List<Reserva> getReservasDisponibles() {
     
     
     public Huesped readHuespedByName(String nombre, String apellido) {
-        List<Huesped> huespedes = getHuespedesDisponibles(); // Obtener la lista de huéspedes
+        List<Huesped> huespedes = getAllHuespedes(); // Obtener la lista de huéspedes
     
         for (Huesped huesped : huespedes) {
             if (huesped.getNombre().equals(nombre) && huesped.getApellido().equals(apellido)) {
@@ -1325,18 +1322,31 @@ public List<Zona> getZonasDisponibles() {
         mongoDB.getCollection("contadores").updateOne(new Document("_id", "id_zona"), new Document("$inc", new Document("seq", 1)));
     }
 
-    
-    
+    public List<Habitacion> getRoomsByHotelId(int hotelId) {
+        List<Habitacion> habitaciones = new ArrayList<>();
 
+        try {
+            // Conectar a la colección de habitaciones en MongoDB
+            MongoCollection<Document> collection = mongoDB.getCollection("habitaciones");
 
+            // Buscar todas las habitaciones que tienen el `id_hotel` especificado
+            List<Document> documentos = collection.find(Filters.eq("id_hotel", hotelId)).into(new ArrayList<>());
 
+            // Convertir cada documento en un objeto `Habitacion` y añadirlo a la lista
+            for (Document doc : documentos) {
+                int idHabitacion = doc.getInteger("id_habitacion");
+                int nroHabitacion = doc.getInteger("nro_habitacion");
+                String tipoHabitacion = doc.getString("tipo_habitacion");
+                List<Integer> amenities = doc.getList("amenities", Integer.class);
 
+                Habitacion habitacion = new Habitacion(idHabitacion, nroHabitacion, hotelId, tipoHabitacion, amenities);
+                habitaciones.add(habitacion);
+            }
+        } catch (Exception e) {
+            System.err.println("Error al obtener las habitaciones para el hotel con ID " + hotelId + ": " + e.getMessage());
+        }
 
-
-
-
-
-
-
+        return habitaciones;
+    }
 
 }
