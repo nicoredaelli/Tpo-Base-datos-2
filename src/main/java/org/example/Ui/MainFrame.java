@@ -12,6 +12,7 @@ import org.example.Ui.Metodo2.CrudHuesped.*;
 import org.example.Ui.Metodo2.CrudReserva.*;
 import org.example.Ui.Metodo3.HotelesCercanosPOIPanel;
 import org.example.Ui.Metodo5.PuntosInteresCercanosHotelPanel;
+import org.example.Ui.Metodo7.AmenitiesHabitacionPanel;
 import org.example.Ui.Metodo1.*;
 import org.example.Ui.Metodo1.CrudAmenitie.*;
 import org.example.Ui.Metodo1.CrudHabitaciones.*;
@@ -77,6 +78,7 @@ public class MainFrame extends JFrame {
 
         mainPanel.add(new HotelesCercanosPOIPanel(this), "HotelesCercanosPOI");
         mainPanel.add(new PuntosInteresCercanosHotelPanel(this), "PuntosInteresCercanosHotel");
+        mainPanel.add(new AmenitiesHabitacionPanel(this), "AmenitiesHabitacion");
 
         add(mainPanel);
         setTitle("Administrador de Hoteles");

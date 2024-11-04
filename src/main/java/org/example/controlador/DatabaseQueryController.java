@@ -5,6 +5,7 @@ import org.example.conexionmongo.MongoDBConnection;
 import org.example.conexionneo4j.Neo4jDBConnection;
 import org.example.entidades.Amenity;
 import org.example.entidades.Hotel;
+import org.example.entidades.Habitacion;
 import org.example.entidades.PuntoDeInteres;
 import org.neo4j.driver.Driver;
 import org.neo4j.driver.Result;
@@ -224,6 +225,26 @@ public class DatabaseQueryController {
             System.err.println("Error al obtener los hoteles disponibles: " + e.getMessage());
         }
         return hoteles;
+    }
+
+    public List<Habitacion> getHabitacionesDisponibles() {
+        List<Habitacion> habitaciones = new ArrayList<>();
+        try {
+            MongoCollection<Document> collection = mongoDB.getCollection("habitaciones");
+            for (Document doc : collection.find()) {
+                Habitacion habitacion = new Habitacion(
+                    doc.getInteger("id_habitacion"),
+                    doc.getInteger("nro_habitacion"),
+                    doc.getInteger("id_hotel"),
+                    doc.getString("tipo_habitacion"),
+                    doc.getList("amenities", Integer.class)
+                );
+                habitaciones.add(habitacion);
+            }
+        } catch (Exception e) {
+            System.err.println("Error al obtener las habitaciones disponibles: " + e.getMessage());
+        }
+        return habitaciones;
     }
 }
 
