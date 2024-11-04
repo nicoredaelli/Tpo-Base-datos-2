@@ -5,6 +5,7 @@ import org.example.conexionmongo.MongoDBConnection;
 import org.example.conexionneo4j.Neo4jDBConnection;
 import org.example.entidades.Amenity;
 import org.example.entidades.Hotel;
+import org.example.entidades.Habitacion;
 import org.example.entidades.PuntoDeInteres;
 import org.neo4j.driver.Driver;
 import org.neo4j.driver.Result;
@@ -145,6 +146,105 @@ public class DatabaseQueryController {
         }
 
         return amenities;
+    }
+
+    public List<Hotel> getHotelesCercanosAPOI(int idPoi) {
+        List<Hotel> hoteles = new ArrayList<>();
+        try (Session session = neo4jDB.session()) {
+            Result result = session.run(
+                "MATCH (h:hotel)-[:PERTENECE]->(z:zona)<-[:PERTENECE]-(p:poi {id_poi: $idPoi}) " +
+                "RETURN h.id_hotel AS id_hotel",
+                Map.of("idPoi", idPoi)
+            );
+            List<Integer> hotelIds = new ArrayList<>();
+            while (result.hasNext()) {
+                Record record = result.next();
+                hotelIds.add(record.get("id_hotel").asInt());
+            }
+            MongoCollection<Document> collection = mongoDB.getCollection("hoteles");
+            for (Integer hotelId : hotelIds) {
+                Document doc = collection.find(Filters.eq("id_hotel", hotelId)).first();
+                if (doc != null) {
+                    Hotel hotel = new Hotel(
+                        doc.getObjectId("_id"),
+                        doc.getInteger("id_hotel"),
+                        doc.getString("nombre"),
+                        doc.getString("telefono"),
+                        doc.getString("email"),
+                        (Map<String, String>) doc.get("direccion"),
+                        (List<Integer>) doc.get("habitaciones"),
+                        doc.getInteger("zona")
+                    );
+                    hoteles.add(hotel);
+                }
+            }
+        } catch (Exception e) {
+            System.err.println("Error al obtener hoteles cercanos a un punto de interés: " + e.getMessage());
+        }
+        return hoteles;
+    }
+
+    public List<PuntoDeInteres> getAllPuntosDeInteres() {
+        List<PuntoDeInteres> puntosDeInteres = new ArrayList<>();
+        try {
+            MongoCollection<Document> collection = mongoDB.getCollection("pois");
+            for (Document doc : collection.find()) {
+                PuntoDeInteres poi = new PuntoDeInteres(
+                    doc.getObjectId("_id"),
+                    doc.getInteger("id_poi"),
+                    doc.getString("nombre"),
+                    doc.getString("descripcion"),
+                    doc.getInteger("zona")
+                );
+                puntosDeInteres.add(poi);
+            }
+        } catch (Exception e) {
+            System.err.println("Error al obtener todos los puntos de interés: " + e.getMessage());
+        }
+        return puntosDeInteres;
+    }
+
+    public List<Hotel> getHotelesDisponibles() {
+        List<Hotel> hoteles = new ArrayList<>();
+        try {
+            MongoCollection<Document> collection = mongoDB.getCollection("hoteles");
+            for (Document doc : collection.find()) {
+                Hotel hotel = new Hotel(
+                    doc.getObjectId("_id"),
+                    doc.getInteger("id_hotel"),
+                    doc.getString("nombre"),
+                    doc.getString("telefono"),
+                    doc.getString("email"),
+                    (Map<String, String>) doc.get("direccion"),
+                    (List<Integer>) doc.get("habitaciones"),
+                    doc.getInteger("zona")
+                );
+                hoteles.add(hotel);
+            }
+        } catch (Exception e) {
+            System.err.println("Error al obtener los hoteles disponibles: " + e.getMessage());
+        }
+        return hoteles;
+    }
+
+    public List<Habitacion> getHabitacionesDisponibles() {
+        List<Habitacion> habitaciones = new ArrayList<>();
+        try {
+            MongoCollection<Document> collection = mongoDB.getCollection("habitaciones");
+            for (Document doc : collection.find()) {
+                Habitacion habitacion = new Habitacion(
+                    doc.getInteger("id_habitacion"),
+                    doc.getInteger("nro_habitacion"),
+                    doc.getInteger("id_hotel"),
+                    doc.getString("tipo_habitacion"),
+                    doc.getList("amenities", Integer.class)
+                );
+                habitaciones.add(habitacion);
+            }
+        } catch (Exception e) {
+            System.err.println("Error al obtener las habitaciones disponibles: " + e.getMessage());
+        }
+        return habitaciones;
     }
 }
 

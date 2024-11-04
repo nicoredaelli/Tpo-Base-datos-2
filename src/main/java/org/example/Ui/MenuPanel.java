@@ -33,6 +33,16 @@ public class MenuPanel extends JPanel {
                 case "Gestión de Huéspedes y Reservas":
                     mainFrame.showPanel("GestiónHR"); // Este nombre debe coincidir con el panel agregado
                     break;
+                case "Hoteles Cercanos a Puntos de Interés":
+                    mainFrame.showPanel("HotelesCercanosPOI");
+                    break;
+                case "Puntos de Interés Cercanos al Hotel":
+                    mainFrame.showPanel("PuntosInteresCercanosHotel");
+                    break;
+                case "Amenities de la Habitación":
+                    mainFrame.showPanel("AmenitiesHabitacion");
+                    break;
+
                 case "Consulta de Información de Hotel":
                     mainFrame.showPanel("xxxx"); // Este nombre debe coincidir con el panel agregado
                     break;
