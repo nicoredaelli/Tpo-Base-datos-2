@@ -36,28 +36,38 @@ public class ReservasPorFechaPanel extends JPanel {
 
         inputPanel.add(new JLabel("Seleccione el Hotel:"));
         hotelDropdown = new JComboBox<>();
-        loadHotelsIntoDropdown(); // Metodo para cargar los hoteles en el JComboBox
+        loadHotelsIntoDropdown(); // Método para cargar los hoteles en el JComboBox
         inputPanel.add(hotelDropdown);
-
-        // Botón para buscar reservas
-        JButton searchButton = new JButton("Buscar Reservas");
-        searchButton.addActionListener(e -> buscarReservasPorFecha());
-        inputPanel.add(searchButton);
-
-        // Botón para regresar al menú principal
-        JButton backButton = new JButton("Regresar");
-        backButton.addActionListener(e -> mainFrame.showPanel("Menu"));
-        inputPanel.add(backButton);
 
         add(inputPanel, BorderLayout.NORTH);
 
         // Área de texto para mostrar los resultados
-        resultArea = new JTextArea(15, 40);
+        resultArea = new JTextArea(15, 40); // Se establece el tamaño del área de texto
         resultArea.setEditable(false);
-        add(new JScrollPane(resultArea), BorderLayout.CENTER);
+        resultArea.setLineWrap(true); // Activar el ajuste de línea
+        resultArea.setWrapStyleWord(true); // Ajustar por palabra
+
+        // Crear un JScrollPane y añadir el área de texto
+        JScrollPane scrollPane = new JScrollPane(resultArea);
+        scrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS); // Siempre mostrar la barra de desplazamiento vertical
+        scrollPane.setPreferredSize(new Dimension(400, 200)); // Establecer un tamaño preferido para el JScrollPane
+
+        add(scrollPane, BorderLayout.CENTER); // Añadir el JScrollPane al panel
+
+        // Crear un panel para los botones
+        JPanel buttonPanel = new JPanel();
+        JButton searchButton = new JButton("Buscar Reservas");
+        searchButton.addActionListener(e -> buscarReservasPorFecha());
+        buttonPanel.add(searchButton);
+
+        JButton backButton = new JButton("Regresar");
+        backButton.addActionListener(e -> mainFrame.showPanel("Menu"));
+        buttonPanel.add(backButton);
+
+        add(buttonPanel, BorderLayout.SOUTH);
     }
 
-    // Metodo para cargar la lista de hoteles en el JComboBox
+    // Método para cargar la lista de hoteles en el JComboBox
     private void loadHotelsIntoDropdown() {
         List<Hotel> hotelesDisponibles = crudController.getAllHoteles();
         if (hotelesDisponibles != null && !hotelesDisponibles.isEmpty()) {
@@ -139,5 +149,3 @@ public class ReservasPorFechaPanel extends JPanel {
         return dateFormat.parse(dateString); // Lanza ParseException si el formato es incorrecto
     }
 }
-
-
