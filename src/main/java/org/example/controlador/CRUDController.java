@@ -333,6 +333,41 @@ public class CRUDController {
             System.err.println("Error al eliminar el punto de interes en Neo4j: " + e.getMessage());
         }
     }
+
+
+    public List<PuntoDeInteres> getPuntosDeInteresDisponibles() {
+        List<PuntoDeInteres> puntosDeInteres = new ArrayList<>();
+    
+        try {
+            MongoCollection<Document> collection = mongoDB.getCollection("pois");
+    
+            // Comprobar si la colección tiene documentos
+            if (collection.countDocuments() == 0) {
+                System.out.println("La colección de puntos de interés está vacía.");
+            } else {
+                System.out.println("Documentos encontrados en la colección de puntos de interés: " + collection.countDocuments());
+            }
+    
+            // Obtener todos los documentos y convertirlos a objetos PuntoDeInteres
+            for (Document doc : collection.find()) {
+                PuntoDeInteres poi = new PuntoDeInteres(
+                        doc.getObjectId("_id"),
+                        doc.getInteger("id_poi"),
+                        doc.getString("nombre"),
+                        doc.getString("descripcion"),
+                        doc.getInteger("zona")
+                );
+                puntosDeInteres.add(poi);
+            }
+    
+        } catch (Exception e) {
+            System.err.println("Error al obtener los puntos de interés: " + e.getMessage());
+        }
+    
+        return puntosDeInteres;
+    }
+    
+    
 //--------------------------------------------------------------------------------------------------------------------------------
 // CRUD para la entidad Amenity
 public void createAmenity(Amenity amenity) {
