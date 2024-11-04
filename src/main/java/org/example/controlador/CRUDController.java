@@ -627,22 +627,8 @@ public Habitacion readHabitacion(int idHabitacion) {
         }
     }
 
-    public List<Habitacion> getHabitacionesDisponibles() {
-        List<Habitacion> habitacionesDisponibles = new ArrayList<>();
-
-        try {
-            // Ejemplo ficticio de habitaciones
-            habitacionesDisponibles.add(new Habitacion(101, 1, "Doble", List.of(1, 2)));
-            habitacionesDisponibles.add(new Habitacion(102, 1, "Sencilla", List.of(2)));
-            habitacionesDisponibles.add(new Habitacion(201, 2, "Suite", List.of(1, 3)));
-
-        } catch (Exception e) {
-            // Manejo de errores en caso de que la recuperación falle
-            e.printStackTrace();
-        }
-
-        return habitacionesDisponibles;
-    }
+   
+    
 
 
 
@@ -1066,24 +1052,7 @@ public List<Reserva> getReservasDisponibles() {
         }
     }
 
-    public void deleteZona(int idZona) {
-        // MongoDB
-        MongoCollection<Document> collection = mongoDB.getCollection("zonas");
-        collection.deleteOne(Filters.eq("id_zona", idZona));
-        System.out.println("Zona eliminada en MongoDB con idZona: " + idZona);
-
-        // Neo4j
-        try (Session session = neo4jDB.session()) {
-            session.writeTransaction(tx -> {
-                tx.run("MATCH (z:zona {id_zona: $idZona}) DETACH DELETE z",
-                        Map.of("idZona", idZona));
-                return null;
-            });
-            System.out.println("Zona eliminada en Neo4j con idZona: " + idZona);
-        } catch (Exception e) {
-            System.err.println("Error al eliminar zona en Neo4j: " + e.getMessage());
-        }
-    }
+  
 
 
 public void deleteZona(int idZona) {
