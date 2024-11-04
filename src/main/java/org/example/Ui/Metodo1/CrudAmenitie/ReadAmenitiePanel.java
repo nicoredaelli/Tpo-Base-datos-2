@@ -8,8 +8,12 @@ import org.example.controlador.CRUDController;
 import org.example.entidades.Amenity;
 import java.awt.Dimension;
 
+import javax.swing.*;
+import java.awt.*;
+import java.util.List;
+
 public class ReadAmenitiePanel extends JPanel {
-    private JTextField idField;
+    private JComboBox<String> amenityDropdown;
     private JTextArea resultArea;
     private CRUDController crudController;
 
@@ -17,10 +21,15 @@ public class ReadAmenitiePanel extends JPanel {
         this.crudController = new CRUDController();
         setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
 
-        // Campo para ingresar el ID del amenity
-        idField = new JTextField(10);
-        add(new JLabel("ID del Amenity a leer:"));
-        add(idField);
+        // Obtener la lista de amenities disponibles desde el CRUDController
+        List<Amenity> amenitiesDisponibles = crudController.getAmenitiesDisponibles();
+        String[] amenityNames = amenitiesDisponibles.stream().map(Amenity::getNombre).toArray(String[]::new);
+
+        // Crear el JComboBox para seleccionar el amenity
+        amenityDropdown = new JComboBox<>(amenityNames);
+        amenityDropdown.setPreferredSize(new Dimension(150, 25)); // Establecer un tamaño preferido
+        add(new JLabel("Seleccione un Amenity a leer:"));
+        add(amenityDropdown);
 
         // Botón para leer el amenity
         JButton readButton = new JButton("Leer Amenity");
@@ -43,9 +52,12 @@ public class ReadAmenitiePanel extends JPanel {
 
     private void readAmenity() {
         try {
-            int idAmenity = Integer.parseInt(idField.getText());
-            Amenity amenity = crudController.readAmenity(idAmenity);
-            
+            String selectedAmenityName = (String) amenityDropdown.getSelectedItem();
+            Amenity amenity = crudController.getAmenitiesDisponibles().stream()
+                .filter(a -> a.getNombre().equals(selectedAmenityName))
+                .findFirst()
+                .orElse(null);
+
             if (amenity != null) {
                 resultArea.setText("Amenity encontrado:\n"
                     + "ID: " + amenity.getIdAmenity() + "\n"
@@ -54,8 +66,8 @@ public class ReadAmenitiePanel extends JPanel {
             } else {
                 resultArea.setText("Amenity no encontrado.");
             }
-        } catch (NumberFormatException e) {
-            JOptionPane.showMessageDialog(this, "Por favor, ingrese un ID válido.", "Error", JOptionPane.ERROR_MESSAGE);
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(this, "Ocurrió un error al leer el amenity.", "Error", JOptionPane.ERROR_MESSAGE);
         }
     }
 }

@@ -1,51 +1,50 @@
 package org.example.Ui.Metodo1.CrudHotel;
 
-import java.awt.Dimension;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
+
 import java.util.List;
-import java.util.Map;
 
-import javax.swing.BoxLayout;
-import javax.swing.JButton;
-import javax.swing.JLabel;
-import javax.swing.JOptionPane;
-import javax.swing.JPanel;
-import javax.swing.JScrollPane;
-import javax.swing.JTextArea;
-import javax.swing.JTextField;
-
-import org.bson.types.ObjectId;
 import org.example.Ui.MainFrame;
 import org.example.controlador.CRUDController;
 import org.example.entidades.Hotel;
+import org.example.entidades.Zona;
+
+import javax.swing.*;
+
+
+
+import javax.swing.*;
+import java.awt.*;
+import java.util.List;
 
 public class ReadHotelPanel extends JPanel {
     
-    private JTextField idField;
+    private JComboBox<String> hotelDropdown; // Cuadro desplegable para seleccionar el hotel
     private JTextArea hotelDetailsArea; // Área para mostrar los detalles del hotel
-
-    CRUDController crudController = new CRUDController();
+    private CRUDController crudController = new CRUDController();
+    private List<Hotel> hotelesDisponibles; // Lista de hoteles disponibles
 
     public ReadHotelPanel(MainFrame mainFrame) {
         setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
 
-        idField = new JTextField();
-        idField.setPreferredSize(new Dimension(10, 30)); // Establecer un tamaño preferido
+        // Obtener la lista de hoteles disponibles desde el CRUDController
+        hotelesDisponibles = crudController.getHotelesDisponibles();
 
-        add(new JLabel("Id del hotel:"));
-        add(idField);
+        // Crear el cuadro desplegable con los nombres de los hoteles
+        hotelDropdown = new JComboBox<>(hotelesDisponibles.stream()
+                .map(Hotel::getNombre)
+                .toArray(String[]::new));
+        
+        add(new JLabel("Seleccione un hotel:"));
+        add(hotelDropdown);
 
-        JButton readButton = new JButton("Leer");
-        readButton.addActionListener(e -> leerHotel());
+        JButton readButton = new JButton("Cargar Datos");
+        readButton.addActionListener(e -> cargarDatos());
 
         JButton backButton = new JButton("Regresar");
         backButton.addActionListener(e -> mainFrame.showPanel("HotelCRUDPanel"));
 
         add(readButton);
         
-
         // Configuración del área de texto para mostrar los detalles del hotel
         hotelDetailsArea = new JTextArea(10, 30);
         hotelDetailsArea.setEditable(false); // Hacer que el área de texto no sea editable
@@ -54,19 +53,33 @@ public class ReadHotelPanel extends JPanel {
         add(backButton);
     }
 
-    private void leerHotel() {
-        try {
-            int id = Integer.parseInt(idField.getText());
-            Hotel hotel = crudController.readHotel(id); // Método que obtiene el hotel por ID
+    private void cargarDatos() {
+        String nombreHotel = (String) hotelDropdown.getSelectedItem();
 
-            if (hotel != null) {
-                // Mostrar los detalles del hotel en el área de texto
-                hotelDetailsArea.setText(hotel.toString()); // Asegúrate de que Hotel tenga un método toString() que muestre los detalles
-            } else {
-                hotelDetailsArea.setText("Hotel no encontrado.");
-            }
-        } catch (NumberFormatException e) {
-            hotelDetailsArea.setText("Por favor, ingrese un ID válido.");
+        // Buscar el hotel seleccionado
+        Hotel hotel = hotelesDisponibles.stream()
+                .filter(h -> h.getNombre().equals(nombreHotel))
+                .findFirst()
+                .orElse(null);
+
+        if (hotel != null) {
+            // Formatear la información del hotel para que sea más legible
+            StringBuilder detalles = new StringBuilder();
+            detalles.append("Detalles del Hotel:\n");
+            detalles.append("ID: ").append(hotel.getIdHotel()).append("\n");
+            detalles.append("Nombre: ").append(hotel.getNombre()).append("\n");
+            detalles.append("Teléfono: ").append(hotel.getTelefono()).append("\n");
+            detalles.append("Email: ").append(hotel.getEmail()).append("\n");
+            
+            detalles.append("Dirección: ").append(hotel.getDireccion()).append("\n");
+            
+            detalles.append("Habitaciones: ").append(hotel.getHabitaciones().size()).append("\n"); // Si tienes la lista de habitaciones
+
+            // Mostrar los detalles del hotel en el área de texto
+            hotelDetailsArea.setText(detalles.toString());
+        } else {
+            hotelDetailsArea.setText("Hotel no encontrado.");
         }
-    }       
+    }
 }
+

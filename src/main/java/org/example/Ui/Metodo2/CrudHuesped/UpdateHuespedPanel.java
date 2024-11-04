@@ -8,9 +8,22 @@ import org.example.Ui.MainFrame;
 import org.example.controlador.CRUDController;
 import org.example.entidades.Huesped;
 
+import javax.swing.*;
+import java.awt.*;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import javax.swing.*;
+import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.util.List;
+import java.util.Map;
 
 public class UpdateHuespedPanel extends JPanel {
-    private JTextField idField, nombreField, apellidoField, telefonoField, emailField, calleField, numeroField, provinciaField, paisField;
+    private JComboBox<String> huespedComboBox; // Menú desplegable para seleccionar huésped
+    private JTextField nombreField, apellidoField, telefonoField, emailField;
+    private JTextField calleField, numeroField, provinciaField, paisField;
     private JButton loadButton, updateButton;
     private CRUDController crudController;
     private Huesped huesped;
@@ -20,38 +33,39 @@ public class UpdateHuespedPanel extends JPanel {
 
         setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
 
-        idField = new JTextField(10);
-        nombreField = new JTextField(20);
-        apellidoField = new JTextField(20);
-        telefonoField = new JTextField(20);
-        emailField = new JTextField(20);
-        calleField = new JTextField(20);
-        numeroField = new JTextField(5);
-        provinciaField = new JTextField(20);
-        paisField = new JTextField(20);
+        huespedComboBox = new JComboBox<>();
+        loadHuespedesDisponibles(); // Cargar huéspedes disponibles en el combo box
 
-        add(new JLabel("ID del Huésped a actualizar:"));
-        add(idField);
+        add(new JLabel("Seleccione un Huésped:"));
+        add(huespedComboBox);
 
         loadButton = new JButton("Cargar Huésped");
         loadButton.addActionListener(e -> cargarHuesped());
         add(loadButton);
 
         add(new JLabel("Nombre:"));
+        nombreField = new JTextField(20);
         add(nombreField);
         add(new JLabel("Apellido:"));
+        apellidoField = new JTextField(20);
         add(apellidoField);
         add(new JLabel("Teléfono:"));
+        telefonoField = new JTextField(20);
         add(telefonoField);
         add(new JLabel("Email:"));
+        emailField = new JTextField(20);
         add(emailField);
         add(new JLabel("Calle:"));
+        calleField = new JTextField(20);
         add(calleField);
         add(new JLabel("Número:"));
+        numeroField = new JTextField(5);
         add(numeroField);
         add(new JLabel("Provincia:"));
+        provinciaField = new JTextField(20);
         add(provinciaField);
         add(new JLabel("País:"));
+        paisField = new JTextField(20);
         add(paisField);
 
         updateButton = new JButton("Actualizar Huésped");
@@ -64,37 +78,48 @@ public class UpdateHuespedPanel extends JPanel {
         add(backButton);
     }
 
+    private void loadHuespedesDisponibles() {
+        List<Huesped> huespedes = crudController.getHuespedesDisponibles();
+        for (Huesped huesped : huespedes) {
+            huespedComboBox.addItem(huesped.getNombre() + " " + huesped.getApellido());
+        }
+    }
+
     private void cargarHuesped() {
-        try {
-            int idHuesped = Integer.parseInt(idField.getText());
-            huesped = crudController.readHuesped(idHuesped);
+        String selectedHuesped = (String) huespedComboBox.getSelectedItem();
+        if (selectedHuesped != null) {
+            String[] parts = selectedHuesped.split(" ");
+            String nombre = parts[0];
+            String apellido = parts[1];
+
+            huesped = crudController.readHuespedByName(nombre, apellido); // Método que debes implementar
 
             if (huesped != null) {
                 nombreField.setText(huesped.getNombre());
                 apellidoField.setText(huesped.getApellido());
                 telefonoField.setText(huesped.getTelefono());
                 emailField.setText(huesped.getEmail());
-                calleField.setText(huesped.getDireccion().get("calle"));
-                numeroField.setText(huesped.getDireccion().get("numero"));
-                provinciaField.setText(huesped.getDireccion().get("provincia"));
-                paisField.setText(huesped.getDireccion().get("pais"));
+
+                // Recuperar la dirección del mapa
+                Map<String, String> direccion = huesped.getDireccion(); // Asegúrate de que este método exista y funcione
+                calleField.setText(direccion.getOrDefault("calle", ""));
+                numeroField.setText(direccion.getOrDefault("numero", ""));
+                provinciaField.setText(direccion.getOrDefault("provincia", ""));
+                paisField.setText(direccion.getOrDefault("pais", ""));
 
                 updateButton.setEnabled(true);
-                JOptionPane.showMessageDialog(this, "Huésped cargado exitosamente.");
-            } else {
-                JOptionPane.showMessageDialog(this, "No se encontró el Huésped con ID: " + idHuesped, "Error", JOptionPane.ERROR_MESSAGE);
-            }
-        } catch (NumberFormatException e) {
-            JOptionPane.showMessageDialog(this, "Por favor, ingrese un ID válido.", "Error", JOptionPane.ERROR_MESSAGE);
+                
+            } 
         }
     }
 
     private void actualizarHuesped() {
-        Map<String, String> direccion = new HashMap<>();
-        direccion.put("calle", calleField.getText());
-        direccion.put("numero", numeroField.getText());
-        direccion.put("provincia", provinciaField.getText());
-        direccion.put("pais", paisField.getText());
+        Map<String, String> direccion = Map.of(
+            "calle", calleField.getText(),
+            "numero", numeroField.getText(),
+            "provincia", provinciaField.getText(),
+            "pais", paisField.getText()
+        );
 
         huesped.setNombre(nombreField.getText());
         huesped.setApellido(apellidoField.getText());
@@ -106,4 +131,3 @@ public class UpdateHuespedPanel extends JPanel {
         JOptionPane.showMessageDialog(this, "Huésped actualizado exitosamente.");
     }
 }
-
