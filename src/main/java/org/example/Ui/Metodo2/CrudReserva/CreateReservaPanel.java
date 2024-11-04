@@ -1,17 +1,18 @@
 package org.example.Ui.Metodo2.CrudReserva;
 
 import javax.swing.*;
-import java.awt.*;
+
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import org.example.Ui.MainFrame;
 import org.example.controlador.CRUDController;
 import org.example.entidades.*;
+import java.util.List;
 
 
 public class CreateReservaPanel extends JPanel {
-    private JTextField checkinField, checkoutField, tarifaField, idHotelField, idHabitacionField, idHuespedField;
-    private JComboBox<EstadoReserva> estadoReservaComboBox;
+    private JTextField checkinField, checkoutField, tarifaField;
+    private JComboBox<Integer> idHotelComboBox, idHabitacionComboBox, idHuespedComboBox;
     private CRUDController crudController;
 
     public CreateReservaPanel(MainFrame mainFrame) {
@@ -22,26 +23,26 @@ public class CreateReservaPanel extends JPanel {
         checkinField = new JTextField(20);
         checkoutField = new JTextField(20);
         tarifaField = new JTextField(10);
-        idHotelField = new JTextField(5);
-        idHabitacionField = new JTextField(5);
-        idHuespedField = new JTextField(5);
 
-        estadoReservaComboBox = new JComboBox<>(EstadoReserva.values());
+        // Inicializar JComboBox para IDs
+        idHotelComboBox = new JComboBox<>(getHotelIds());
+        idHabitacionComboBox = new JComboBox<>(getHabitacionIds());
+        idHuespedComboBox = new JComboBox<>(getHuespedIds());
 
         add(new JLabel("Fecha de Check-in (yyyy-MM-dd):"));
         add(checkinField);
         add(new JLabel("Fecha de Check-out (yyyy-MM-dd):"));
         add(checkoutField);
         add(new JLabel("Estado de la Reserva:"));
-        add(estadoReservaComboBox);
+        add(new JLabel("CONFIRMADO")); // Mostrar estado fijo
         add(new JLabel("Tarifa:"));
         add(tarifaField);
         add(new JLabel("ID del Hotel:"));
-        add(idHotelField);
+        add(idHotelComboBox);
         add(new JLabel("ID de la Habitación:"));
-        add(idHabitacionField);
+        add(idHabitacionComboBox);
         add(new JLabel("ID del Huésped:"));
-        add(idHuespedField);
+        add(idHuespedComboBox);
 
         JButton createButton = new JButton("Crear Reserva");
         createButton.addActionListener(e -> crearReserva());
@@ -60,17 +61,37 @@ public class CreateReservaPanel extends JPanel {
                 codReserva,
                 new SimpleDateFormat("yyyy-MM-dd").parse(checkinField.getText()),
                 new SimpleDateFormat("yyyy-MM-dd").parse(checkoutField.getText()),
-                (EstadoReserva) estadoReservaComboBox.getSelectedItem(),
+                EstadoReserva.CONFIRMADO, // Estado fijo
                 Double.parseDouble(tarifaField.getText()),
-                Integer.parseInt(idHotelField.getText()),
-                Integer.parseInt(idHabitacionField.getText()),
-                Integer.parseInt(idHuespedField.getText())
+                (Integer) idHotelComboBox.getSelectedItem(), // Obtener ID seleccionado del JComboBox
+                (Integer) idHabitacionComboBox.getSelectedItem(), // Obtener ID seleccionado del JComboBox
+                (Integer) idHuespedComboBox.getSelectedItem() // Obtener ID seleccionado del JComboBox
             );
 
             crudController.createReserva(nuevaReserva);
             JOptionPane.showMessageDialog(this, "Reserva creada exitosamente.");
-        } catch (ParseException | NumberFormatException e) {
-            JOptionPane.showMessageDialog(this, "Error: datos inválidos.", "Error", JOptionPane.ERROR_MESSAGE);
+        } catch (ParseException e) {
+            JOptionPane.showMessageDialog(this, "Error en las fechas: " + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+        } catch (NumberFormatException e) {
+            JOptionPane.showMessageDialog(this, "Error en la tarifa: " + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(this, "Ocurrió un error al crear la reserva: " + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
         }
+    }
+
+    // Métodos para obtener los IDs desde el CRUDController
+    private Integer[] getHotelIds() {
+        List<Hotel> hoteles = crudController.getHotelesDisponibles();
+        return hoteles.stream().map(Hotel::getIdHotel).toArray(Integer[]::new);
+    }
+
+    private Integer[] getHabitacionIds() {
+        List<Habitacion> habitaciones = crudController.getHabitacionesDisponibles();
+        return habitaciones.stream().map(Habitacion::getNroHabitacion).toArray(Integer[]::new);
+    }
+
+    private Integer[] getHuespedIds() {
+        List<Huesped> huespedes = crudController.getHuespedesDisponibles();
+        return huespedes.stream().map(Huesped::getIdHuesped).toArray(Integer[]::new);
     }
 }

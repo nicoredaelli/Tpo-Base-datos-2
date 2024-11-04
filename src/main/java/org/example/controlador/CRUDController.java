@@ -1,6 +1,7 @@
 package org.example.controlador;
 
 import com.mongodb.ReadPreference;
+import com.mongodb.client.FindIterable;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoCursor;
 import com.mongodb.client.MongoDatabase;
@@ -16,6 +17,8 @@ import org.neo4j.driver.Session;
 import org.neo4j.driver.Transaction;
 import org.neo4j.driver.Values;
 
+import java.sql.Date;
+import java.text.SimpleDateFormat;
 import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -606,6 +609,24 @@ public void deleteHabitacion(int nroHabitacion) {
     }
 }
 
+    public List<Habitacion> getHabitacionesDisponibles() {
+        List<Habitacion> habitacionesDisponibles = new ArrayList<>();
+
+        try {
+            // Ejemplo ficticio de habitaciones
+            habitacionesDisponibles.add(new Habitacion(101, 1, "Doble", List.of(1, 2)));
+            habitacionesDisponibles.add(new Habitacion(102, 1, "Sencilla", List.of(2)));
+            habitacionesDisponibles.add(new Habitacion(201, 2, "Suite", List.of(1, 3)));
+
+        } catch (Exception e) {
+            // Manejo de errores en caso de que la recuperación falle
+            e.printStackTrace();
+        }
+
+        return habitacionesDisponibles;
+    }
+
+
 
     public List<Hotel> getHotelesDisponibles() {
         List<Hotel> hoteles = new ArrayList<>();
@@ -721,7 +742,32 @@ public void deleteReserva(int codReserva) {
     }
 }
 
+public List<Reserva> getReservasDisponibles() {
+        List<Reserva> reservas = new ArrayList<>();
+        MongoCollection<Document> collection = mongoDB.getCollection("reservas"); // Cambia el nombre de la colección según tu estructura
 
+        // Obtener todas las reservas de la colección
+        FindIterable<Document> documentos = collection.find();
+        for (Document doc : documentos) {
+            int codReserva = doc.getInteger("codReserva");
+            Date checkin = (Date) doc.getDate("checkin");
+            Date checkout = (Date) doc.getDate("checkout");
+            EstadoReserva estadoReserva = EstadoReserva.valueOf(doc.getString("estadoReserva")); // Asegúrate de que coincide con tu Enum
+            double tarifa = doc.getDouble("tarifa");
+            int idHotel = doc.getInteger("idHotel");
+            int idHabitacion = doc.getInteger("idHabitacion");
+            int idHuesped = doc.getInteger("idHuesped");
+
+            // Crear objeto Reserva y agregarlo a la lista
+            Reserva reserva = new Reserva(codReserva, checkin, checkout, estadoReserva, tarifa, idHotel, idHabitacion, idHuesped);
+            reservas.add(reserva);
+        }
+        return reservas;
+    }
+   
+
+
+    
 
 //------------------------------------------------------------------------------------------------------------------------------------
     // CRUD para la entidad Huesped
