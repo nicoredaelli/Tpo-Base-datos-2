@@ -13,6 +13,15 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
 
+import javax.swing.*;
+import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.List;
+import org.bson.Document;
+
 public class BuscarHabitacionDisponiblePanel extends JPanel {
     private JTextField checkinField;
     private JTextField checkoutField;
@@ -24,31 +33,48 @@ public class BuscarHabitacionDisponiblePanel extends JPanel {
         this.crudController = new CRUDController();
         this.databaseQueryController = new DatabaseQueryController();
         setLayout(new BorderLayout());
+        setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10)); // Márgenes más pequeños
+        
+        // Panel de entrada para fechas con GridBagLayout para mayor control de espacio
+        JPanel inputPanel = new JPanel(new GridBagLayout());
+        GridBagConstraints gbc = new GridBagConstraints();
+        gbc.insets = new Insets(5, 5, 5, 5); // Espacio entre componentes
 
-        // Panel de entrada para fechas
-        JPanel inputPanel = new JPanel(new FlowLayout());
-        inputPanel.add(new JLabel("Ingrese Check-in (YYYY-MM-DD):"));
-        checkinField = new JTextField(10);
-        inputPanel.add(checkinField);
+        gbc.gridx = 0;
+        gbc.gridy = 0;
+        inputPanel.add(new JLabel("Check-in (YYYY-MM-DD):"), gbc);
+        
+        gbc.gridx = 1;
+        checkinField = new JTextField(8);
+        inputPanel.add(checkinField, gbc);
 
-        inputPanel.add(new JLabel("Ingrese Check-out (YYYY-MM-DD):"));
-        checkoutField = new JTextField(10);
-        inputPanel.add(checkoutField);
+        gbc.gridx = 0;
+        gbc.gridy = 1;
+        inputPanel.add(new JLabel("Check-out (YYYY-MM-DD):"), gbc);
+        
+        gbc.gridx = 1;
+        checkoutField = new JTextField(8);
+        inputPanel.add(checkoutField, gbc);
 
-        // Botón para buscar habitaciones
-        JButton searchButton = new JButton("Buscar Habitaciones");
+        // Botón de búsqueda
+        gbc.gridx = 0;
+        gbc.gridy = 2;
+        gbc.gridwidth = 2;
+        gbc.fill = GridBagConstraints.HORIZONTAL;
+        JButton searchButton = new JButton("Buscar");
         searchButton.addActionListener(e -> buscarHabitaciones());
-        inputPanel.add(searchButton);
+        inputPanel.add(searchButton, gbc);
 
-        // Botón para regresar al menú principal
+        // Botón de regreso
+        gbc.gridy = 3;
         JButton backButton = new JButton("Regresar");
         backButton.addActionListener(e -> mainFrame.showPanel("Menu"));
-        inputPanel.add(backButton);
+        inputPanel.add(backButton, gbc);
 
         add(inputPanel, BorderLayout.NORTH);
 
-        // Área de texto para mostrar los resultados
-        resultArea = new JTextArea(10, 30);
+        // Área de texto para mostrar resultados
+        resultArea = new JTextArea(8, 25); // Reducir tamaño
         resultArea.setEditable(false);
         add(new JScrollPane(resultArea), BorderLayout.CENTER);
     }
