@@ -5,17 +5,7 @@ import org.example.controlador.CRUDController;
 import org.example.entidades.Hotel;
 
 import javax.swing.*;
-import java.awt.event.ActionEvent;
-import java.util.List;
-
-import javax.swing.*;
-
-
-import javax.swing.*;
 import java.awt.*;
-
-
-import javax.swing.*;
 import java.awt.event.ActionEvent;
 import java.util.List;
 
@@ -28,43 +18,51 @@ public class RoomSelectionPanel extends JPanel {
         this.mainFrame = mainFrame;
         this.crudController = new CRUDController();
 
-        setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
+        setLayout(new BorderLayout());
+
+        JPanel contentPanel = new JPanel();
+        contentPanel.setLayout(new BoxLayout(contentPanel, BoxLayout.Y_AXIS));
+        contentPanel.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20)); // Añadir márgenes
+
+        JLabel titleLabel = new JLabel("Seleccione un hotel:");
+        titleLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
 
         hotelDropdown = new JComboBox<>();
+        hotelDropdown.setMaximumSize(new Dimension(250, 30)); // Ajustar el tamaño del combo box
+        loadHotels();
 
-        // Llenar el JComboBox con los hoteles disponibles
+        JButton selectHotelButton = new JButton("Seleccionar Hotel");
+        selectHotelButton.setAlignmentX(Component.CENTER_ALIGNMENT);
+        selectHotelButton.addActionListener(this::selectHotel);
+
+        JButton backButton = new JButton("Regresar");
+        backButton.setAlignmentX(Component.CENTER_ALIGNMENT);
+        backButton.addActionListener(e -> mainFrame.showPanel("RoomCRUDPanel"));
+
+        contentPanel.add(titleLabel);
+        contentPanel.add(Box.createVerticalStrut(10)); // Espacio entre componentes
+        contentPanel.add(hotelDropdown);
+        contentPanel.add(Box.createVerticalStrut(10));
+        contentPanel.add(selectHotelButton);
+        contentPanel.add(Box.createVerticalStrut(10));
+        contentPanel.add(backButton);
+
+        add(contentPanel, BorderLayout.CENTER);
+    }
+
+    private void loadHotels() {
         List<Hotel> hotelesDisponibles = crudController.getAllHoteles();
         for (Hotel hotel : hotelesDisponibles) {
             hotelDropdown.addItem(hotel.getIdHotel() + " - " + hotel.getNombre());
         }
-
-        JButton selectHotelButton = new JButton("Seleccionar Hotel");
-        selectHotelButton.addActionListener(this::selectHotel);
-
-        JButton backButton = new JButton("Regresar");
-        backButton.addActionListener(e -> mainFrame.showPanel("RoomCRUDPanel"));
-
-        add(new JLabel("Seleccione un hotel:"));
-        add(hotelDropdown);
-        add(selectHotelButton);
-        add(backButton);
     }
 
     private void selectHotel(ActionEvent e) {
         String selectedHotel = (String) hotelDropdown.getSelectedItem();
         if (selectedHotel != null) {
             int hotelId = Integer.parseInt(selectedHotel.split(" - ")[0]);
-
-            // Crear y mostrar el ReadRoomPanel con el hotelId seleccionado
             mainFrame.showRoomPanel(hotelId);
             mainFrame.showPanel("ReadRoomPanel");
         }
     }
 }
-
-
-
-
-
-
-

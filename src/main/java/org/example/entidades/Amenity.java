@@ -49,4 +49,11 @@ public class Amenity {
         this.nombre = nombre;
         this.descripcion = descripcion;
     }
+
+    public Amenity(int idAmenity, String nombre, String descripcion) {
+        this.idAmenity = idAmenity;
+        this.nombre = nombre;
+        this.descripcion = descripcion;
+    }
+
 }

@@ -43,40 +43,28 @@ public class DatabaseQueryController {
         List<PuntoDeInteres> puntosDeInteres = new ArrayList<>();
 
         try (Session session = neo4jDB.session()) {
-            // Paso 1: Obtener solo los IDs de los puntos de interés relacionados con el hotel en Neo4j
+            // Consulta en Neo4j para obtener los puntos de interés asociados al hotel
             Result result = session.run(
                     "MATCH (p:poi)-[:PERTENECE]->(z:zona)<-[:PERTENECE]-(h:hotel {id_hotel: $idHotel}) " +
-                            "RETURN p.id_poi AS id_poi",
+                            "RETURN p.id_poi AS id_poi, p.nombre AS nombre",
                     Map.of("idHotel", idHotel)
             );
 
-            // Recoger todos los ids de puntos de interés en una lista
-            List<Integer> poiIds = new ArrayList<>();
+            // Crear objetos PuntoDeInteres usando solo los datos de Neo4j
             while (result.hasNext()) {
                 Record record = result.next();
-                poiIds.add(record.get("id_poi").asInt());
-            }
-
-            // Paso 2: Buscar los detalles de cada punto de interés en MongoDB usando los IDs
-            MongoCollection<Document> collection = mongoDB.getCollection("pois");
-            for (Integer poiId : poiIds) {
-                Document doc = collection.find(Filters.eq("id_poi", poiId)).first();
-                if (doc != null) {
-                    PuntoDeInteres poi = new PuntoDeInteres(
-                            doc.getObjectId("_id"),
-                            doc.getInteger("id_poi"),
-                            doc.getString("nombre"),
-                            doc.getString("descripcion"),
-                            doc.getInteger("zona")
-                    );
-                    puntosDeInteres.add(poi);
-                }
+                PuntoDeInteres poi = new PuntoDeInteres(
+                        record.get("id_poi").asInt(),
+                        record.get("nombre").asString()
+                );
+                puntosDeInteres.add(poi);
             }
         } catch (Exception e) {
             System.err.println("Error al obtener puntos de interés por ID de hotel: " + e.getMessage());
         }
         return puntosDeInteres;
     }
+
 
     public List<Hotel> getHotelesByIDPOI(int idPoi) {
         List<Hotel> hoteles = new ArrayList<>();
@@ -126,8 +114,8 @@ public class DatabaseQueryController {
         try (Session session = neo4jDB.session()) {
             // Paso 1: Obtener los IDs de los amenities relacionados con la habitación en Neo4j
             Result result = session.run(
-                        "MATCH (h:habitacion{nro_habitacion:$nroHabitacion})-[:TIENE_AMENITY]->(a:amenity) " +
-                                "RETURN DISTINCT a.id_amenity AS id_amenity",
+                    "MATCH (h:habitacion {nro_habitacion: $nroHabitacion})-[:TIENE_AMENITY]->(a:amenity) " +
+                            "RETURN DISTINCT a.id_amenity AS id_amenity",
                     Map.of("nroHabitacion", nroHabitacion)
             );
 
@@ -136,6 +124,11 @@ public class DatabaseQueryController {
             while (result.hasNext()) {
                 Record record = result.next();
                 amenityIds.add(record.get("id_amenity").asInt());
+            }
+
+            // Si no hay amenities, devolver lista vacía inmediatamente
+            if (amenityIds.isEmpty()) {
+                return amenities;
             }
 
             // Paso 2: Buscar los detalles de cada amenity en MongoDB usando los IDs
@@ -158,6 +151,7 @@ public class DatabaseQueryController {
 
         return amenities;
     }
+
 
 
     public List<Reserva> findReservasByHuesped(int idHuesped) {
@@ -272,37 +266,26 @@ public class DatabaseQueryController {
         List<Hotel> hoteles = new ArrayList<>();
         try (Session session = neo4jDB.session()) {
             Result result = session.run(
-                "MATCH (h:hotel)-[:PERTENECE]->(z:zona)<-[:PERTENECE]-(p:poi {id_poi: $idPoi}) " +
-                "RETURN h.id_hotel AS id_hotel",
-                Map.of("idPoi", idPoi)
+                    "MATCH (h:hotel)-[:PERTENECE]->(z:zona)<-[:PERTENECE]-(p:poi {id_poi: $idPoi}) " +
+                            "RETURN h.id_hotel AS id_hotel, h.nombre AS nombre, z.id_zona AS zona",
+                    Map.of("idPoi", idPoi)
             );
-            List<Integer> hotelIds = new ArrayList<>();
+
             while (result.hasNext()) {
                 Record record = result.next();
-                hotelIds.add(record.get("id_hotel").asInt());
-            }
-            MongoCollection<Document> collection = mongoDB.getCollection("hoteles");
-            for (Integer hotelId : hotelIds) {
-                Document doc = collection.find(Filters.eq("id_hotel", hotelId)).first();
-                if (doc != null) {
-                    Hotel hotel = new Hotel(
-                        doc.getObjectId("_id"),
-                        doc.getInteger("id_hotel"),
-                        doc.getString("nombre"),
-                        doc.getString("telefono"),
-                        doc.getString("email"),
-                        (Map<String, String>) doc.get("direccion"),
-                        (List<Integer>) doc.get("habitaciones"),
-                        doc.getInteger("zona")
-                    );
-                    hoteles.add(hotel);
-                }
+                Hotel hotel = new Hotel(
+                        record.get("id_hotel").asInt(),
+                        record.get("nombre").asString(),
+                        record.get("zona").asInt()
+                );
+                hoteles.add(hotel);
             }
         } catch (Exception e) {
             System.err.println("Error al obtener hoteles cercanos a un punto de interés: " + e.getMessage());
         }
         return hoteles;
     }
+
 
     public List<PuntoDeInteres> getAllPuntosDeInteres() {
         List<PuntoDeInteres> puntosDeInteres = new ArrayList<>();

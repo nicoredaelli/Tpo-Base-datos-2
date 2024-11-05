@@ -104,4 +104,11 @@ public class Hotel {
 
     }
 
+    // Constructor para Neo4j
+    public Hotel(int idHotel, String nombre, int zona) {
+        this.idHotel = idHotel;
+        this.nombre = nombre;
+        this.zona = zona;
+    }
+
 }

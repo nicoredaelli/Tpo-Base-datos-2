@@ -8,17 +8,6 @@ import org.example.controlador.DatabaseQueryController;
 import org.example.entidades.Hotel;
 import org.example.entidades.PuntoDeInteres;
 
-import javax.swing.*;
-import java.awt.*;
-import java.util.List;
-import javax.swing.*;
-import java.awt.*;
-import java.util.List;
-
-import javax.swing.*;
-import java.awt.*;
-import java.util.List;
-
 public class HotelesCercanosPOIPanel extends JPanel {
     private MainFrame mainFrame;
     private DatabaseQueryController dbController;
@@ -30,27 +19,28 @@ public class HotelesCercanosPOIPanel extends JPanel {
         this.dbController = new DatabaseQueryController();
         setLayout(new BorderLayout());
         setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
-        
+
         // Panel superior para selección de POI y botones
         JPanel inputPanel = new JPanel(new GridBagLayout());
         inputPanel.setBorder(BorderFactory.createTitledBorder("Buscar Hoteles Cercanos"));
         inputPanel.setBackground(new Color(230, 240, 255));
-        
+
         GridBagConstraints gbc = new GridBagConstraints();
         gbc.insets = new Insets(5, 5, 5, 5);
-        
+
         List<PuntoDeInteres> puntosDeInteres = dbController.getAllPuntosDeInteres();
-        
-        // Crear el JComboBox con los puntos de interés
+
+        // Crear el JComboBox con los puntos de interés y asignar el renderer
         poiComboBox = new JComboBox<>(puntosDeInteres.toArray(new PuntoDeInteres[0]));
-        
+        poiComboBox.setRenderer(new POIRenderer());
+
         JButton searchButton = new JButton("Buscar Hoteles");
         JButton backButton = new JButton("Regresar");
 
         searchButton.setBackground(new Color(70, 130, 180));
         searchButton.setForeground(Color.WHITE);
         searchButton.setFocusPainted(false);
-        
+
         backButton.setBackground(new Color(200, 200, 200));
         backButton.setFocusPainted(false);
 
@@ -58,7 +48,7 @@ public class HotelesCercanosPOIPanel extends JPanel {
         gbc.gridx = 0;
         gbc.gridy = 0;
         inputPanel.add(new JLabel("Punto de Interés:"), gbc);
-        
+
         gbc.gridx = 1;
         inputPanel.add(poiComboBox, gbc);
 
@@ -66,7 +56,7 @@ public class HotelesCercanosPOIPanel extends JPanel {
         gbc.gridy = 1;
         gbc.gridwidth = 2;
         inputPanel.add(searchButton, gbc);
-        
+
         gbc.gridy = 2;
         inputPanel.add(backButton, gbc);
 
@@ -79,7 +69,7 @@ public class HotelesCercanosPOIPanel extends JPanel {
         hotelesTextArea.setWrapStyleWord(true);
         hotelesTextArea.setBorder(BorderFactory.createTitledBorder("Hoteles Cercanos"));
         add(new JScrollPane(hotelesTextArea), BorderLayout.CENTER);
-        
+
         // Acción del botón de búsqueda
         searchButton.addActionListener(e -> {
             PuntoDeInteres selectedPoi = (PuntoDeInteres) poiComboBox.getSelectedItem();
@@ -95,7 +85,7 @@ public class HotelesCercanosPOIPanel extends JPanel {
 
     private void displayHoteles(List<Hotel> hoteles) {
         hotelesTextArea.setText(""); // Limpiar el área de texto antes de mostrar nuevos resultados.
-        
+
         if (hoteles.isEmpty()) {
             hotelesTextArea.setText("No se encontraron hoteles cercanos.");
         } else {
@@ -114,10 +104,9 @@ public class HotelesCercanosPOIPanel extends JPanel {
             super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus);
             if (value instanceof PuntoDeInteres) {
                 PuntoDeInteres poi = (PuntoDeInteres) value;
-                setText(poi.getNombre()); // Mostrar solo el nombre en el JComboBox
+                setText(poi.getIdPoi() + " - " + poi.getNombre()); // Mostrar ID y Nombre en el JComboBox
             }
             return this;
         }
     }
 }
-
