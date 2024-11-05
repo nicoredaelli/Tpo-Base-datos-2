@@ -21,6 +21,7 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
 import org.bson.Document;
+import org.example.entidades.Hotel;
 
 public class BuscarHabitacionDisponiblePanel extends JPanel {
     private JTextField checkinField;
@@ -90,6 +91,16 @@ public class BuscarHabitacionDisponiblePanel extends JPanel {
             if (habitacionesDisponibles != null && !habitacionesDisponibles.isEmpty()) {
                 StringBuilder result = new StringBuilder("Habitaciones disponibles:\n");
                 for (Document habitacion : habitacionesDisponibles) {
+                    int hotelId = habitacion.getInteger("id_hotel");
+
+                    // Obtener el nombre del hotel
+                    Hotel hotel = databaseQueryController.getHotelesDisponibles().stream()
+                            .filter(h -> h.getIdHotel() == hotelId)
+                            .findFirst()
+                            .orElse(null);
+                    String hotelName = (hotel != null) ? hotel.getNombre() : "Desconocido";
+
+                    result.append("Hotel: ").append(hotelName).append("\n");
                     result.append("ID Habitación: ").append(habitacion.getInteger("id_habitacion")).append("\n");
                     result.append("Número: ").append(habitacion.getInteger("nro_habitacion")).append("\n");
                     result.append("Tipo: ").append(habitacion.getString("tipo_habitacion")).append("\n\n");
@@ -105,6 +116,7 @@ public class BuscarHabitacionDisponiblePanel extends JPanel {
             JOptionPane.showMessageDialog(this, "Error al buscar habitaciones: " + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
         }
     }
+
 
     private Date parseDate(String dateString) throws ParseException {
         SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");

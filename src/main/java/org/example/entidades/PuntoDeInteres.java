@@ -68,4 +68,11 @@ public class PuntoDeInteres {
         this.descripcion = descripcion;
         this.zona = zona;
     }
+
+    // Constructor solo para Neo4j
+    public PuntoDeInteres(int idPoi, String nombre) {
+        this.idPoi = idPoi;
+        this.nombre = nombre;
+    }
+
 }

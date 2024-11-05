@@ -903,16 +903,23 @@ public void updateReserva(Reserva reserva) {
     }
 }
 
-public void deleteReserva(int codReserva) {
-    // MongoDB
-    try {
-        MongoCollection<Document> collection = mongoDB.getCollection("reservas");
-        collection.deleteOne(Filters.eq("cod_reserva", codReserva));
-        System.out.println("Reserva eliminada en MongoDB con codReserva: " + codReserva);
-    } catch (Exception e) {
-        System.err.println("Error al eliminar reserva en MongoDB: " + e.getMessage());
+    public void deleteReserva(int codReserva) {
+        // MongoDB
+        try {
+            MongoCollection<Document> collection = mongoDB.getCollection("reservas");
+
+            // Actualizar el estado de la reserva a CANCELADO
+            collection.updateOne(
+                    Filters.eq("cod_reserva", codReserva),
+                    new Document("$set", new Document("estado_reserva", EstadoReserva.CANCELADO.name()))
+            );
+
+            System.out.println("Reserva con codReserva " + codReserva + " ha sido marcada como CANCELADA en MongoDB.");
+        } catch (Exception e) {
+            System.err.println("Error al cancelar la reserva en MongoDB: " + e.getMessage());
+        }
     }
-}
+
 
 public List<Reserva> getReservasDisponibles() {
         List<Reserva> reservas = new ArrayList<>();

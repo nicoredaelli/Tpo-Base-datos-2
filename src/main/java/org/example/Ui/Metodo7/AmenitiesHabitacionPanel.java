@@ -2,25 +2,28 @@ package org.example.Ui.Metodo7;
 
 import javax.swing.*;
 import java.awt.*;
+import java.util.ArrayList;
 import java.util.List;
 import org.example.Ui.MainFrame;
+import org.example.controlador.CRUDController;
 import org.example.controlador.DatabaseQueryController;
 import org.example.entidades.Habitacion;
 import org.example.entidades.Amenity;
 
-
 public class AmenitiesHabitacionPanel extends JPanel {
     private MainFrame mainFrame;
     private DatabaseQueryController dbController;
+    private CRUDController crudController;
     private JComboBox<Habitacion> habitacionComboBox;
     private JTextArea amenitiesTextArea;
 
     public AmenitiesHabitacionPanel(MainFrame mainFrame) {
         this.mainFrame = mainFrame;
         this.dbController = new DatabaseQueryController();
+        this.crudController = new CRUDController();
         setLayout(new BorderLayout());
         setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
-        
+
         // Panel de selección de habitación y botones
         JPanel inputPanel = new JPanel(new GridBagLayout());
         inputPanel.setBorder(BorderFactory.createTitledBorder("Buscar Amenities de Habitación"));
@@ -28,11 +31,14 @@ public class AmenitiesHabitacionPanel extends JPanel {
 
         GridBagConstraints gbc = new GridBagConstraints();
         gbc.insets = new Insets(5, 5, 5, 5);
-        
+
         // Recuperar habitaciones disponibles
         List<Habitacion> habitaciones = dbController.getHabitacionesDisponibles();
         habitacionComboBox = new JComboBox<>(habitaciones.toArray(new Habitacion[0]));
-        
+
+        // Establecer el renderer personalizado para mostrar el formato correcto en el comboBox
+        habitacionComboBox.setRenderer(new HabitacionRenderer());
+
         JButton searchButton = new JButton("Buscar Amenities");
         JButton backButton = new JButton("Regresar");
 
@@ -47,15 +53,15 @@ public class AmenitiesHabitacionPanel extends JPanel {
         gbc.gridx = 0;
         gbc.gridy = 0;
         inputPanel.add(new JLabel("Habitación:"), gbc);
-        
+
         gbc.gridx = 1;
         inputPanel.add(habitacionComboBox, gbc);
-        
+
         gbc.gridx = 0;
         gbc.gridy = 1;
         gbc.gridwidth = 2;
         inputPanel.add(searchButton, gbc);
-        
+
         gbc.gridy = 2;
         inputPanel.add(backButton, gbc);
 
@@ -84,7 +90,7 @@ public class AmenitiesHabitacionPanel extends JPanel {
 
     private void displayAmenities(List<Amenity> amenities) {
         amenitiesTextArea.setText(""); // Limpiar el área de texto antes de mostrar nuevos resultados.
-        
+
         if (amenities.isEmpty()) {
             amenitiesTextArea.setText("No se encontraron amenities para esta habitación.");
         } else {
@@ -93,6 +99,20 @@ public class AmenitiesHabitacionPanel extends JPanel {
                 amenitiesInfo.append(amenity.getNombre()).append("\n");
             }
             amenitiesTextArea.setText(amenitiesInfo.toString());
+        }
+    }
+
+    // Renderer personalizado para formatear la lista desplegable del comboBox
+    private class HabitacionRenderer extends DefaultListCellRenderer {
+        @Override
+        public Component getListCellRendererComponent(JList<?> list, Object value, int index, boolean isSelected, boolean cellHasFocus) {
+            super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus);
+            if (value instanceof Habitacion) {
+                Habitacion habitacion = (Habitacion) value;
+                String nombreHotel = crudController.readHotel(habitacion.getIdHotel()).getNombre();
+                setText("Nro: " + habitacion.getNroHabitacion() + ", Hotel: " + nombreHotel + ", Tipo: " + habitacion.getTipoHabitacion());
+            }
+            return this;
         }
     }
 }
